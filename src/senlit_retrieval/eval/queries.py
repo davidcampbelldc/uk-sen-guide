@@ -33,14 +33,23 @@ class Matcher:
             if k == "section_ref":
                 if section_ref is None or section_ref != v:
                     return False
+            elif k == "section_ref_prefix":
+                # Matches whole chapters: prefix "9." matches 9.1, 9.2, 9.100 etc.
+                if section_ref is None or not section_ref.startswith(str(v)):
+                    return False
             elif k == "doc_id_contains":
                 if doc_id is None or str(v) not in doc_id:
                     return False
             elif k == "text_contains":
-                # Fuzzy match on chunk text (falls back when structural match not possible)
-                text = chunk_meta.get("text", "")
-                if str(v).lower() not in text.lower():
-                    return False
+                # Single string → substring match.
+                # List → all items must appear (AND semantics, tight anchoring).
+                text = chunk_meta.get("text", "").lower()
+                if isinstance(v, (list, tuple)):
+                    if not all(str(item).lower() in text for item in v):
+                        return False
+                else:
+                    if str(v).lower() not in text:
+                        return False
             else:
                 if chunk_meta.get(k) != v:
                     return False

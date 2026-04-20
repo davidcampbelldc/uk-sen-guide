@@ -70,7 +70,7 @@ class SearchService:
         config: SearchConfig = "hybrid_rerank",
         filters: dict[str, Any] | None = None,
         candidate_pool: int = 100,
-        rerank_pool: int = 50,
+        rerank_pool: int = 10,
     ) -> SearchResponse:
         t0 = time.perf_counter()
         query_id = f"q-{int(t0 * 1000) & 0xFFFFFFFF:08x}"

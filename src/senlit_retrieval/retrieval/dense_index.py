@@ -106,15 +106,15 @@ class DenseIndex:
         )[0].tolist()
         qdrant_filter = _build_filter(filters) if filters else None
 
-        hits = self._client.search(
+        response = self._client.query_points(
             collection_name=self.collection,
-            query_vector=vector,
+            query=vector,
             limit=top_k,
             query_filter=qdrant_filter,
             with_payload=True,
         )
         out: list[tuple[str, float, dict[str, Any]]] = []
-        for h in hits:
+        for h in response.points:
             payload = h.payload or {}
             out.append((payload.get("chunk_id", ""), float(h.score), payload))
         return out

@@ -1,166 +1,171 @@
 # Senlit Retrieval evaluation set — graded queries across 6 types.
 #
-# Ground-truth matchers are open-schema dicts against chunk metadata:
-#   source:            matches chunk.metadata.source
-#   section_ref:       matches chunk.section_ref (SEND CoP numbered paragraphs, e.g. "1.1")
-#   local_authority:   matches chunk.metadata.local_authority
-#   charity:           matches chunk.metadata.charity
-#   doc_id_contains:   substring match on chunk.doc_id
-#   text_contains:     case-insensitive substring match on chunk.text (use for topic anchors)
-#   any other key:     exact match against chunk.metadata[key]
+# Matcher grammar (all conditions AND'd together):
+#   source:              chunk.metadata.source exact
+#   section_ref:         chunk.section_ref exact (e.g. "1.1", "11.45")
+#   section_ref_prefix:  chunk.section_ref startswith (e.g. "9." matches all ch.9)
+#   local_authority:     chunk.metadata.local_authority exact
+#   charity:             chunk.metadata.charity exact
+#   doc_id_contains:     substring match on chunk.doc_id
+#   text_contains:       string (substring) or list-of-strings (all must appear — AND)
+#   any other key:       exact match on chunk.metadata[key]
 #
 # Relevance: 2 = directly answers, 1 = substantially helpful.
+#
+# Matchers are tuned for 10-40 qrels per query — broad enough to find the answer,
+# tight enough that recall@5 is mathematically meaningful.
+#
+# SEND CoP structure reference (detected from the 2015 PDF):
+#   Ch 1  — Principles underpinning the Code (§1.1 references s.19 CFA 2014)
+#   Ch 4  — Working together across EHC services
+#   Ch 5  — Early years
+#   Ch 6  — Schools (SENCO duties around §6.84)
+#   Ch 7  — Further education
+#   Ch 8  — Preparing for adulthood
+#   Ch 9  — EHC needs assessments and plans (large, 225 chunks)
+#   Ch 10 — Health + social care working with education
+#   Ch 11 — Resolving disagreements + mediation + SEND Tribunal
 
 queries:
 
-  # ── Statutory citation (SEND CoP expected) ────────────────────────────────
+  # ── Statutory citation (SEND CoP chapter-anchored) ────────────────────────
   - id: q001
     type: statutory-citation
     query: "What does the SEND Code of Practice say about local authority duties under Section 19 of the Children and Families Act 2014?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "Section 19 of the Children and Families Act"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["Section 19", "Children and Families Act"]}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "have regard to"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "1."}
         relevance: 1
 
   - id: q002
     type: statutory-citation
     query: "Under the SEND Code of Practice, what are the principles for identifying children with special educational needs?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "identifying"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "1."}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "special educational needs"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["identifying", "special educational"]}
         relevance: 1
 
   - id: q003
     type: statutory-citation
     query: "What does the SEND Code of Practice say about Education Health and Care needs assessments?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "EHC needs assessment"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9."}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "needs assessment"}
-        relevance: 1
 
   - id: q004
     type: statutory-citation
     query: "What guidance does the SEND Code of Practice give on mediation and disagreement resolution?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "mediation"}
-        relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "disagreement resolution"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "11."}
         relevance: 2
 
   - id: q005
     type: statutory-citation
     query: "What does the SEND Code of Practice say about preparing young people for adulthood?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "preparing for adulthood"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "8."}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "post-16"}
-        relevance: 1
 
   - id: q006
     type: statutory-citation
     query: "What does the SEND Code of Practice say about the role of a school's SEN coordinator (SENCO)?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "SENCO"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["SENCO"]}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "SEN coordinator"}
-        relevance: 2
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "6."}
+        relevance: 1
 
   - id: q007
     type: statutory-citation
     query: "What does the SEND Code of Practice say about personal budgets for EHCP provision?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "personal budget"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["personal budget"]}
         relevance: 2
 
-  # ── Symptom-driven (parent voice) ──────────────────────────────────────────
+  # ── Symptom-driven (parent voice) — scoped to parent-facing sources ────────
   - id: q008
     type: symptom-driven
     query: "My 7 year old has autism and the school keeps saying he's just being naughty. What are my rights?"
     relevant:
-      - match: {text_contains: "autism"}
+      - match: {text_contains: ["autism", "school"]}
         relevance: 2
-      - match: {text_contains: "exclusion"}
-        relevance: 1
-      - match: {source: "charity-site", charity: "IPSEA"}
-        relevance: 1
+      - match: {text_contains: ["autism", "exclusion"]}
+        relevance: 2
 
   - id: q009
     type: symptom-driven
     query: "My child can't read at the expected level and the teacher says he's just lazy. What should I do?"
     relevant:
-      - match: {text_contains: "learning difficulties"}
+      - match: {text_contains: ["learning difficulties", "reading"]}
         relevance: 2
-      - match: {text_contains: "reading"}
+      - match: {text_contains: ["dyslexia"]}
         relevance: 1
 
   - id: q010
     type: symptom-driven
     query: "My daughter with ADHD is struggling to cope with secondary school transition. What support is available?"
     relevant:
-      - match: {text_contains: "transition"}
+      - match: {text_contains: ["ADHD"]}
         relevance: 2
-      - match: {text_contains: "secondary"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "8.", text_contains: ["transition"]}
         relevance: 1
 
   - id: q011
     type: symptom-driven
     query: "My son has sensory processing differences and refuses to eat school meals. What reasonable adjustments can I request?"
     relevant:
-      - match: {text_contains: "sensory"}
+      - match: {text_contains: ["sensory", "school"]}
         relevance: 2
-      - match: {text_contains: "reasonable adjustment"}
+      - match: {text_contains: ["reasonable adjustment", "school"]}
         relevance: 2
 
   - id: q012
     type: symptom-driven
     query: "School is threatening to exclude my child with SEN. What are our rights?"
     relevant:
-      - match: {text_contains: "exclusion"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["exclusion"]}
         relevance: 2
-      - match: {source: "charity-site", charity: "IPSEA", text_contains: "exclusion"}
-        relevance: 2
+      - match: {text_contains: ["exclusion", "SEN"]}
+        relevance: 1
 
   - id: q013
     type: symptom-driven
     query: "My autistic teenager is anxious about moving to college. What SEND support exists post-16?"
     relevant:
-      - match: {text_contains: "post-16"}
+      - match: {text_contains: ["post-16"]}
         relevance: 2
-      - match: {text_contains: "autism"}
-        relevance: 1
-      - match: {text_contains: "further education"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "7."}
+        relevance: 2
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "8."}
         relevance: 1
 
   - id: q014
     type: symptom-driven
     query: "My child with dyslexia needs extra time in exams. How do I request reasonable adjustments?"
     relevant:
-      - match: {text_contains: "reasonable adjustment"}
+      - match: {text_contains: ["reasonable adjustment", "exam"]}
         relevance: 2
-      - match: {text_contains: "exam"}
-        relevance: 1
+      - match: {text_contains: ["dyslexia", "exam"]}
+        relevance: 2
 
   - id: q015
     type: symptom-driven
     query: "My 4 year old shows developmental delays. When should I seek SEN support?"
     relevant:
-      - match: {text_contains: "early years"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "5."}
         relevance: 2
-      - match: {text_contains: "identifying"}
-        relevance: 1
+      - match: {text_contains: ["early years", "identifying"]}
+        relevance: 2
 
   - id: q016
     type: symptom-driven
     query: "My child was refused an EHC plan and I think it's wrong. What can I do?"
     relevant:
-      - match: {text_contains: "appeal"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["refuse", "appeal"]}
         relevance: 2
-      - match: {text_contains: "refuse"}
-        relevance: 2
-      - match: {source: "charity-site", charity: "IPSEA"}
+      - match: {text_contains: ["refused", "EHC plan"]}
         relevance: 2
 
   # ── Process / how-to ───────────────────────────────────────────────────────
@@ -168,76 +173,74 @@ queries:
     type: process
     query: "How do I apply for an EHCP needs assessment for my child?"
     relevant:
-      - match: {text_contains: "request"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9.", text_contains: ["request"]}
         relevance: 2
-      - match: {text_contains: "EHC needs assessment"}
-        relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "request an EHC needs assessment"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["request", "EHC"]}
         relevance: 2
 
   - id: q018
     type: process
     query: "How do I appeal to the SEND Tribunal against an EHCP decision?"
     relevant:
-      - match: {text_contains: "appeal"}
+      - match: {text_contains: ["SEND Tribunal", "appeal"]}
         relevance: 2
-      - match: {text_contains: "SEND Tribunal"}
-        relevance: 2
-      - match: {source: "charity-site", charity: "IPSEA", text_contains: "appeal"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["tribunal"]}
         relevance: 2
 
   - id: q019
     type: process
     query: "What is the process for getting an Education Health and Care plan reviewed annually?"
     relevant:
-      - match: {text_contains: "annual review"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["annual review"]}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "annual review"}
+      - match: {text_contains: ["annual review", "EHC"]}
         relevance: 2
 
   - id: q020
     type: process
     query: "How do I request a personal budget for my child's EHCP provision?"
     relevant:
-      - match: {text_contains: "personal budget"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["personal budget"]}
+        relevance: 2
+      - match: {text_contains: ["personal budget", "EHC"]}
         relevance: 2
 
   - id: q021
     type: process
     query: "What is the process for choosing a school for my child with an EHCP?"
     relevant:
-      - match: {text_contains: "school"}
-        relevance: 1
-      - match: {source: "gov.uk/send-cop", text_contains: "parental preference"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["parental preference"]}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "Section 41"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["Section 41"]}
+        relevance: 2
+      - match: {source: "gov.uk/send-cop", text_contains: ["named", "school"]}
         relevance: 1
 
   - id: q022
     type: process
     query: "How do I request home-to-school transport for my child with SEND?"
     relevant:
-      - match: {text_contains: "transport"}
+      - match: {text_contains: ["home to school", "transport"]}
         relevance: 2
-      - match: {text_contains: "home to school"}
-        relevance: 2
+      - match: {text_contains: ["transport", "SEND"]}
+        relevance: 1
 
   - id: q023
     type: process
     query: "How do I start the EHC needs assessment mediation process with the local authority?"
     relevant:
-      - match: {text_contains: "mediation"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "11.", text_contains: ["mediation"]}
         relevance: 2
-      - match: {text_contains: "local authority"}
-        relevance: 1
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["mediation"]}
+        relevance: 2
 
   - id: q024
     type: process
     query: "What's the difference between SEN support and an Education Health and Care plan?"
     relevant:
-      - match: {text_contains: "SEN support"}
+      - match: {text_contains: ["SEN support", "EHC plan"]}
         relevance: 2
-      - match: {text_contains: "EHC plan"}
+      - match: {text_contains: ["SEN support", "EHCP"]}
         relevance: 2
 
   # ── Timing / deadline ──────────────────────────────────────────────────────
@@ -245,38 +248,36 @@ queries:
     type: timing
     query: "How long does the local authority have to respond to an EHC needs assessment request?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "6 weeks"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["6 weeks"]}
         relevance: 2
-      - match: {text_contains: "response"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9.", text_contains: ["weeks"]}
         relevance: 1
 
   - id: q026
     type: timing
     query: "What is the statutory timeframe for issuing an Education Health and Care plan?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "20 weeks"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["20 weeks"]}
         relevance: 2
-      - match: {text_contains: "timeframe"}
-        relevance: 1
 
   - id: q027
     type: timing
     query: "How long do I have to appeal an EHC plan decision to the SEND Tribunal?"
     relevant:
-      - match: {text_contains: "2 months"}
+      - match: {text_contains: ["two months", "appeal"]}
         relevance: 2
-      - match: {text_contains: "appeal"}
-        relevance: 1
-      - match: {text_contains: "deadline"}
+      - match: {text_contains: ["2 months", "appeal"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["time limit"]}
         relevance: 1
 
   - id: q028
     type: timing
     query: "When must the annual review of an EHC plan be completed?"
     relevant:
-      - match: {text_contains: "annual review"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["annual review", "12 months"]}
         relevance: 2
-      - match: {text_contains: "12 months"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["annual review"]}
         relevance: 1
 
   # ── Rights / refusal ───────────────────────────────────────────────────────
@@ -284,53 +285,47 @@ queries:
     type: rights-refusal
     query: "Can a local authority refuse to carry out an EHC needs assessment?"
     relevant:
-      - match: {source: "gov.uk/send-cop", text_contains: "refuse to carry out"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9.", text_contains: ["refuse"]}
         relevance: 2
-      - match: {source: "gov.uk/send-cop", text_contains: "criteria"}
-        relevance: 1
-      - match: {source: "charity-site", charity: "IPSEA", text_contains: "refuse"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["refuse", "assessment"]}
         relevance: 2
 
   - id: q030
     type: rights-refusal
     query: "Can the school refuse to accept my child's EHCP and named placement?"
     relevant:
-      - match: {text_contains: "named placement"}
+      - match: {source: "gov.uk/send-cop", text_contains: ["Section 41"]}
         relevance: 2
-      - match: {text_contains: "Section 41"}
-        relevance: 1
-      - match: {source: "gov.uk/send-cop", text_contains: "refuse"}
-        relevance: 1
+      - match: {source: "gov.uk/send-cop", text_contains: ["named", "placement"]}
+        relevance: 2
 
   - id: q031
     type: rights-refusal
     query: "What rights do I have if the council is not providing the support specified in my child's EHCP?"
     relevant:
-      - match: {text_contains: "provision"}
-        relevance: 1
-      - match: {source: "charity-site", charity: "IPSEA"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["judicial review"]}
         relevance: 2
-      - match: {text_contains: "judicial review"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["provision", "enforce"]}
+        relevance: 2
+      - match: {text_contains: ["not providing", "EHC"]}
         relevance: 1
 
   - id: q032
     type: rights-refusal
     query: "Can the school remove SEN support from my child without consulting me?"
     relevant:
-      - match: {text_contains: "SEN support"}
+      - match: {text_contains: ["SEN support", "consult"]}
         relevance: 2
-      - match: {text_contains: "parental"}
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "6.", text_contains: ["SEN support"]}
         relevance: 1
 
   - id: q033
     type: rights-refusal
     query: "What should I do if my child's school is not following their EHC plan?"
     relevant:
-      - match: {text_contains: "EHC plan"}
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["EHC plan", "not"]}
         relevance: 2
-      - match: {source: "charity-site", charity: "IPSEA"}
-        relevance: 2
-      - match: {text_contains: "provision"}
+      - match: {text_contains: ["EHC plan", "provision", "not"]}
         relevance: 1
 
   # ── Out-of-scope (should return low-confidence) ────────────────────────────
@@ -343,3 +338,94 @@ queries:
     type: out-of-scope
     query: "What is the recipe for a traditional Victoria sponge cake?"
     relevant: []
+
+  # ── Real-parent-scenario — anonymised tribunal-prep queries ────────────────
+  # Grounded in the lived experience of parents navigating refusal-to-assess
+  # and tribunal preparation. No identifying detail. These are the queries
+  # we most want the system to handle well.
+
+  - id: q036
+    type: real-parent-scenario
+    query: "How do I appeal a local authority's refusal to conduct an EHC needs assessment?"
+    relevant:
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9.", text_contains: ["refuse"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["refuse", "assess"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["appeal", "assessment"]}
+        relevance: 2
+
+  - id: q037
+    type: real-parent-scenario
+    query: "What evidence supports an EHC needs assessment appeal where the child has emerging mental-health concerns?"
+    relevant:
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9.", text_contains: ["evidence", "assessment"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["evidence", "appeal"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["mental health"]}
+        relevance: 1
+
+  - id: q038
+    type: real-parent-scenario
+    query: "What are a school's legal duties to support a child with SEN while awaiting formal diagnosis?"
+    relevant:
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "6.", text_contains: ["SEN support"]}
+        relevance: 2
+      - match: {source: "gov.uk/send-cop", text_contains: ["identifying", "needs"]}
+        relevance: 1
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["school", "duty"]}
+        relevance: 2
+
+  - id: q039
+    type: real-parent-scenario
+    query: "What mental-health and emotional-wellbeing factors does the SEND Tribunal consider when deciding on an EHC plan?"
+    relevant:
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9.", text_contains: ["mental health"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["tribunal", "mental"]}
+        relevance: 2
+      - match: {text_contains: ["social", "emotional", "mental"]}
+        relevance: 1
+
+  - id: q040
+    type: real-parent-scenario
+    query: "What is the typical timeline for a SEND Tribunal appeal from refusal-to-assess to hearing?"
+    relevant:
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["tribunal", "weeks"]}
+        relevance: 2
+      - match: {source: "gov.uk/dfe-stats", text_contains: ["tribunal"]}
+        relevance: 1
+      - match: {text_contains: ["appeal", "hearing"]}
+        relevance: 1
+
+  - id: q041
+    type: real-parent-scenario
+    query: "What proportion of SEND Tribunal appeals are decided in favour of parents?"
+    relevant:
+      - match: {source: "gov.uk/dfe-stats", text_contains: ["tribunal"]}
+        relevance: 2
+      - match: {source: "gov.uk/send", text_contains: ["tribunal", "statistics"]}
+        relevance: 1
+
+  - id: q042
+    type: real-parent-scenario
+    query: "What support exists for parents considering withdrawing a SEND Tribunal appeal?"
+    relevant:
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["withdraw"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["tribunal", "settle"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["mediation"]}
+        relevance: 1
+
+  - id: q043
+    type: real-parent-scenario
+    query: "If parents separate during a SEND process, whose consent is required for an EHC needs assessment request?"
+    relevant:
+      - match: {source: "gov.uk/send-cop", section_ref_prefix: "9.", text_contains: ["parental"]}
+        relevance: 2
+      - match: {source: "charity-site", charity: "IPSEA", text_contains: ["parental responsibility"]}
+        relevance: 2
+      - match: {text_contains: ["parent", "consent", "EHC"]}
+        relevance: 1
