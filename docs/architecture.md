@@ -116,6 +116,30 @@ that absorbs source-specific fields without schema migration:
 `publication_year`, etc. The `/search` API's `filters` argument maps
 directly onto this dict.
 
+### Why file-based storage (no SQL DB for chunks)
+
+Chunks are persisted as JSONL (one file per chunker-config hash) and
+documents as individual JSON files. No SQLite, no Postgres, no
+MongoDB. That's a deliberate choice at this corpus size (~1.2K docs,
+~8.7K chunks):
+
+- **The dense index is already a DB** — Qdrant stores vectors and
+  payload metadata with a proper index. Metadata filtering
+  (`local_authority`, `source`, date ranges, custom tags) goes through
+  Qdrant, which is where it belongs.
+- **BM25 needs the full chunk text in process memory anyway** (bm25s
+  design). A DB fetch wouldn't save that cost.
+- **No concurrent writers** during ingest; single-writer semantics are
+  already satisfied by file rewrite.
+- **Reviewer reproducibility** — files are inspectable with `jq`, `grep`,
+  and `cat`; no DB setup step in the README.
+
+A production rollout to 100K+ documents or with multiple concurrent
+writers would move chunk metadata to SQLite (single-file, zero-infra,
+upsertable) or Postgres. That migration is captured in `docs/ROADMAP.md`
+under production-scale concerns. At this scale, adding a DB costs
+complexity and gains nothing measurable.
+
 ## 5. Retrieval pipeline
 
 Three configurations share the same `SearchResult` shape so the eval
