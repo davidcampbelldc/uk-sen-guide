@@ -2,25 +2,44 @@
 
 Run with:
     uvicorn senlit_retrieval.api.server:app --host 0.0.0.0 --port 8000
+
+Observability:
+    GET /health    — service + index size
+    GET /metrics   — Prometheus-style metrics (counters + latency histograms)
+
+Logs are emitted as JSON on stderr. Each request gets a `query_id` that
+appears on every log line for that request, so tracing a request through
+fusion and rerank is grep-by-id.
 """
 
 from __future__ import annotations
 
-import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
+import structlog
 
+from ..observability import (
+    configure_logging,
+    get_logger,
+    reranker_invocations_total,
+    search_candidates_pool,
+    search_latency_seconds,
+    search_requests_total,
+    search_results_returned,
+)
 from ..retrieval.bm25_index import Bm25Index
 from ..retrieval.dense_index import DenseIndex
 from ..retrieval.reranker import CrossEncoderReranker
-from ..retrieval.search import SearchConfig, SearchService
+from ..retrieval.search import SearchService
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 
 class SearchRequest(BaseModel):
@@ -55,15 +74,16 @@ class SearchResponseModel(BaseModel):
     total_candidates: int
 
 
-# Globals — set at startup
+# Process-wide service — set at startup
 _service: SearchService | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    configure_logging(level=os.environ.get("SENLIT_LOG_LEVEL", "INFO"))
     global _service
     index_dir = Path(os.environ.get("SENLIT_INDEX_DIR", "data/index"))
-    log.info("loading indices from %s", index_dir)
+    log.info("service.startup", phase="loading-indices", index_dir=str(index_dir))
     bm25 = Bm25Index()
     bm25.load(index_dir / "bm25")
     dense = DenseIndex(
@@ -73,9 +93,13 @@ async def lifespan(app: FastAPI):
     )
     reranker = CrossEncoderReranker()
     _service = SearchService(bm25=bm25, dense=dense, reranker=reranker)
-    log.info("service ready — BM25 %d chunks, Qdrant %d points", bm25.size, dense.count())
+    log.info(
+        "service.ready",
+        bm25_chunks=bm25.size,
+        dense_points=dense.count(),
+    )
     yield
-    log.info("shutdown")
+    log.info("service.shutdown")
 
 
 app = FastAPI(
@@ -84,6 +108,9 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+# Expose /metrics with default HTTP metrics + our custom ones
+Instrumentator().instrument(app).expose(app, include_in_schema=False, endpoint="/metrics")
 
 
 @app.get("/health")
@@ -101,12 +128,50 @@ def health() -> dict[str, Any]:
 def search(req: SearchRequest) -> SearchResponseModel:
     if _service is None:
         raise HTTPException(status_code=503, detail="service not ready")
-    resp = _service.search(
-        query=req.query,
-        top_k=req.top_k,
-        config=req.config,
-        filters=req.filters,
+
+    t0 = time.perf_counter()
+    config = req.config
+    try:
+        resp = _service.search(
+            query=req.query,
+            top_k=req.top_k,
+            config=config,
+            filters=req.filters,
+        )
+    except Exception as exc:
+        search_requests_total.labels(config=config, status="error").inc()
+        log.error(
+            "search.error",
+            config=config,
+            error=str(exc),
+            error_type=type(exc).__name__,
+            latency_ms=int((time.perf_counter() - t0) * 1000),
+        )
+        raise HTTPException(status_code=500, detail="search failed") from exc
+
+    # Metrics
+    elapsed = time.perf_counter() - t0
+    search_requests_total.labels(config=config, status="ok").inc()
+    search_latency_seconds.labels(config=config).observe(elapsed)
+    search_candidates_pool.labels(config=config).observe(resp.total_candidates)
+    search_results_returned.labels(config=config).observe(len(resp.results))
+    if config == "hybrid_rerank":
+        reranker_invocations_total.inc()
+
+    # Bind query_id into log context so logs correlate
+    log_ = structlog.get_logger(__name__).bind(
+        query_id=resp.query_id,
+        config=config,
     )
+    log_.info(
+        "search.ok",
+        latency_ms=resp.latency_ms,
+        candidates=resp.total_candidates,
+        returned=len(resp.results),
+        has_filters=bool(req.filters),
+        top_k=req.top_k,
+    )
+
     return SearchResponseModel(
         query_id=resp.query_id,
         results=[
