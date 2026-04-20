@@ -22,6 +22,7 @@ from .models import Chunk, Document
 from .sources.base import SourceAdapter
 from .sources.dfe_tabular import DfeStatsTabularAdapter
 from .sources.gov_uk_send import GovUkSendAdapter
+from .sources.la_local_offer import LaLocalOfferAdapter
 from .sources.send_cop import SendCopAdapter
 
 app = typer.Typer(add_completion=False, no_args_is_help=False)
@@ -36,7 +37,12 @@ CHUNKERS: dict[str, type[Chunker]] = {
 
 
 def available_adapters() -> list[SourceAdapter]:
-    return [SendCopAdapter(), GovUkSendAdapter(), DfeStatsTabularAdapter()]
+    return [
+        SendCopAdapter(),
+        GovUkSendAdapter(),
+        DfeStatsTabularAdapter(),
+        LaLocalOfferAdapter(),
+    ]
 
 
 def write_documents(docs: Iterable[Document], out_dir: Path) -> int:
