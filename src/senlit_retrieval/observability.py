@@ -22,7 +22,6 @@ import sys
 import structlog
 from prometheus_client import Counter, Histogram
 
-
 # ── Custom metrics ────────────────────────────────────────────────────────
 search_requests_total = Counter(
     "senlit_search_requests_total",
@@ -77,10 +76,11 @@ def configure_logging(level: str = "INFO", json_output: bool = True) -> None:
         structlog.processors.TimeStamper(fmt="iso", utc=True),
         structlog.processors.StackInfoRenderer(),
     ]
-    if json_output:
-        renderer = structlog.processors.JSONRenderer()
-    else:
-        renderer = structlog.dev.ConsoleRenderer(colors=True)
+    renderer = (
+        structlog.processors.JSONRenderer()
+        if json_output
+        else structlog.dev.ConsoleRenderer(colors=True)
+    )
 
     structlog.configure(
         processors=shared_processors + [renderer],

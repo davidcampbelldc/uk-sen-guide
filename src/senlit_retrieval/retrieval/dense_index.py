@@ -9,10 +9,9 @@ Metadata filtering is done Qdrant-side — we push an open-schema payload
 from __future__ import annotations
 
 import logging
-from pathlib import Path
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
-import numpy as np
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import (
     Distance,
@@ -71,7 +70,11 @@ class DenseIndex:
         for batch in _chunked(chunks, self.batch_size):
             texts = [c["text"] for c in batch]
             vectors = self.encoder.encode(
-                texts, batch_size=self.batch_size, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False
+                texts,
+                batch_size=self.batch_size,
+                convert_to_numpy=True,
+                normalize_embeddings=True,
+                show_progress_bar=False,
             )
             points = [
                 PointStruct(

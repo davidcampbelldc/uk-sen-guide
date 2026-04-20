@@ -8,8 +8,8 @@ beyond re-checking cached inputs.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import typer
 from rich.console import Console

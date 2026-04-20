@@ -75,7 +75,7 @@ class Bm25Index:
         row_idx = np.asarray(results[0]).tolist()
         row_scores = np.asarray(scores[0]).tolist()
         out: list[tuple[str, float]] = []
-        for idx, score in zip(row_idx, row_scores):
+        for idx, score in zip(row_idx, row_scores, strict=False):
             if 0 <= idx < len(self._chunk_ids):
                 out.append((self._chunk_ids[idx], float(score)))
         return out

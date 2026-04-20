@@ -17,7 +17,7 @@ def _sha256_hex(data: bytes) -> str:
 
 def hash_text(text: str, salt: str = "") -> str:
     """Short stable hash of a text blob (salt-able for disambiguation)."""
-    h = _sha256_hex(f"{salt}\x00{text}".encode("utf-8"))
+    h = _sha256_hex(f"{salt}\x00{text}".encode())
     return h[:16]  # 64 bits, collision-resistant at our scale
 
 

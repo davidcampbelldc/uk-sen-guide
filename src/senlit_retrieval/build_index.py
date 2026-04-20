@@ -46,7 +46,10 @@ def run(
     if chunks_path is None:
         jsonls = sorted((data_root / "chunks").glob("chunks-*.jsonl"))
         if not jsonls:
-            console.print(f"[red]No chunks found under {data_root}/chunks. Run `python -m senlit_retrieval.ingest` first.[/]")
+            console.print(
+                f"[red]No chunks found under {data_root}/chunks. "
+                f"Run `python -m senlit_retrieval.ingest` first.[/]"
+            )
             raise typer.Exit(code=1)
         chunks_path = jsonls[-1]
 

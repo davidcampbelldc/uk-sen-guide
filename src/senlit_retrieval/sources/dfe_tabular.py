@@ -16,9 +16,9 @@ import io
 import logging
 import re
 import time
-from datetime import datetime, timezone
+from collections.abc import Iterable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable
 
 import httpx
 from bs4 import BeautifulSoup
@@ -170,7 +170,7 @@ class DfeStatsTabularAdapter(SourceAdapter):
             meta = SourceMetadata(
                 source=self.source,
                 source_id=source_id,
-                fetched_at=datetime.now(timezone.utc),
+                fetched_at=datetime.now(UTC),
                 url=file_url,
                 licence=self.licence,
                 extras={
@@ -269,7 +269,7 @@ def _format_description(
         f"DfE SEN statistics {kind}: {basename}",
         f"Source URL: {source_url}",
         f"Publication page: {publication_url}",
-        f"Licence: Open Government Licence v3.0",
+        "Licence: Open Government Licence v3.0",
         f"Total data rows: {row_count:,}",
         f"Columns ({len(header)}):",
     ]

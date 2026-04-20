@@ -12,9 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from dataclasses import asdict
 from pathlib import Path
-from typing import Any
 
 import typer
 from rich.console import Console
@@ -190,7 +188,7 @@ def run(
         for config in selected:
             scores = [
                 m.ndcg_at_5
-                for m, q in zip(results_by_config[config].per_query, all_queries)
+                for m, q in zip(results_by_config[config].per_query, all_queries, strict=False)
                 if q.type == t
             ]
             row.append(f"{(sum(scores) / len(scores)) if scores else 0:.3f}")

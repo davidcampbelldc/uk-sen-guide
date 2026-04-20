@@ -1,6 +1,6 @@
 """Chunker tests — verify invariants across strategies."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from senlit_retrieval.chunking import FixedSizeChunker, HeadingBoundaryChunker
 from senlit_retrieval.models import Document, Section, SourceMetadata
@@ -10,7 +10,7 @@ def _make_doc(body: str, sections: list[Section] | None = None) -> Document:
     meta = SourceMetadata(
         source="test",
         source_id="t1",
-        fetched_at=datetime.now(timezone.utc),
+        fetched_at=datetime.now(UTC),
         url=None,
         licence="test",
     )
@@ -36,7 +36,7 @@ def test_fixed_chunker_splits_with_overlap():
     body = "a" * 250
     chunks = FixedSizeChunker(max_chars=100, overlap_chars=20).chunk(_make_doc(body))
     assert len(chunks) >= 3
-    for a, b in zip(chunks, chunks[1:]):
+    for a, b in zip(chunks, chunks[1:], strict=False):
         # Each subsequent chunk starts before the previous one ends.
         assert b.char_start < a.char_end
 

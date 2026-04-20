@@ -10,9 +10,9 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timezone
+from collections.abc import Iterable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable
 
 import httpx
 from pypdf import PdfReader
@@ -65,7 +65,7 @@ class SendCopAdapter(SourceAdapter):
         meta = SourceMetadata(
             source=self.source,
             source_id=source_id,
-            fetched_at=datetime.now(timezone.utc),
+            fetched_at=datetime.now(UTC),
             url=self.override_pdf_url or GOV_UK_LANDING,
             licence=self.licence,
             extras={

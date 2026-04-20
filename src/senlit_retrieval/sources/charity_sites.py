@@ -15,10 +15,10 @@ from __future__ import annotations
 import logging
 import re
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable
 
 import httpx
 from bs4 import BeautifulSoup
@@ -237,7 +237,7 @@ class CharitySitesAdapter(SourceAdapter):
         meta = SourceMetadata(
             source=self.source,
             source_id=source_id,
-            fetched_at=datetime.now(timezone.utc),
+            fetched_at=datetime.now(UTC),
             url=url,
             licence=self.licence,
             extras={
