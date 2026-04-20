@@ -158,6 +158,7 @@ select {
 .conf-high { background: #d9eadb; color: var(--ok); }
 .conf-medium { background: #f5efcc; color: #6d5d1e; }
 .conf-low { background: var(--warn-bg); color: var(--warn); }
+.mono-tiny { font-size: 0.68rem; opacity: 0.8; }
 
 .answer-body {
   white-space: pre-wrap;

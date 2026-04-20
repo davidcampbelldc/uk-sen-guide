@@ -147,6 +147,10 @@ def chat_submit(
     synth = _synthesizer.synthesize(query, retrieval.results)
     latency_ms = int((time.perf_counter() - t0) * 1000)
 
+    # Retrieval-side observability — top score, top source, per-retriever breakdown.
+    top_result = retrieval.results[0] if retrieval.results else None
+    top_scores = top_result.scores if top_result else {}
+
     structlog.get_logger(__name__).bind(
         query_id=retrieval.query_id,
         config=config,
@@ -156,8 +160,16 @@ def chat_submit(
         total_ms=latency_ms,
         confidence=synth.confidence,
         escalated=synth.escalated,
+        synthesis_provider=synth.provider,
+        synthesis_model=synth.model,
         input_tokens=synth.input_tokens,
         output_tokens=synth.output_tokens,
+        top_fused=top_scores.get("fused"),
+        top_bm25=top_scores.get("bm25"),
+        top_semantic=top_scores.get("semantic"),
+        top_source=top_result.source_ref.get("source") if top_result else None,
+        top_section=top_result.section_ref if top_result else None,
+        num_candidates=retrieval.total_candidates,
     )
 
     return _TEMPLATES.TemplateResponse(
@@ -173,6 +185,10 @@ def chat_submit(
             "latency_ms": latency_ms,
             "cost_gbp": synth.cost_gbp,
             "config_used": retrieval.config_used,
+            "provider": synth.provider,
+            "model": synth.model,
+            "query_id": retrieval.query_id,
+            "top_fused": top_scores.get("fused"),
         },
     )
 

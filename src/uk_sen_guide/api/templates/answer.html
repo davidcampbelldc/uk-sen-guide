@@ -2,14 +2,21 @@
   <header class="answer-head">
     <span class="query">{{ query }}</span>
     <span class="meta">
-      {% if confidence != "out_of_scope" %}
+      {% if confidence == "llm_error" %}
+        <span class="pill conf-low" title="LLM call failed — retrieval succeeded. Check the server logs.">synthesis failed</span>
+      {% elif confidence != "out_of_scope" %}
         <span class="pill conf-{{ confidence }}">{{ confidence }} confidence</span>
+      {% endif %}
+      {% if top_fused is not none %}
+        <span class="pill" title="Top retrieved chunk's fused score">top={{ "%.2f"|format(top_fused) }}</span>
       {% endif %}
       {% if latency_ms %}<span class="pill">{{ latency_ms }}ms</span>{% endif %}
       {% if cost_gbp is not none and cost_gbp > 0 %}
         <span class="pill">£{{ "%.4f"|format(cost_gbp) }}</span>
       {% endif %}
+      {% if provider %}<span class="pill">{{ provider }}{% if model %}:{{ model }}{% endif %}</span>{% endif %}
       <span class="pill">{{ config_used }}</span>
+      {% if query_id %}<span class="pill mono-tiny" title="Query ID (grep-able in logs)">{{ query_id }}</span>{% endif %}
     </span>
   </header>
 
@@ -18,8 +25,14 @@
   </div>
 
   {% if citations %}
-    <details class="sources">
-      <summary>Sources ({{ citations|length }})</summary>
+    <details class="sources" {% if escalated %}open{% endif %}>
+      <summary>
+        {% if escalated and confidence == "llm_error" %}
+          Retrieved sources ({{ citations|length }}) — shown directly because synthesis failed
+        {% else %}
+          Sources ({{ citations|length }})
+        {% endif %}
+      </summary>
       <ol class="citations">
         {% for c in citations %}
           <li>
