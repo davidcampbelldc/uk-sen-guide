@@ -20,6 +20,7 @@ from .chunking import Chunker, FixedSizeChunker, HeadingBoundaryChunker
 from .hashing import hash_config
 from .models import Chunk, Document
 from .sources.base import SourceAdapter
+from .sources.gov_uk_send import GovUkSendAdapter
 from .sources.send_cop import SendCopAdapter
 
 app = typer.Typer(add_completion=False, no_args_is_help=False)
@@ -34,7 +35,7 @@ CHUNKERS: dict[str, type[Chunker]] = {
 
 
 def available_adapters() -> list[SourceAdapter]:
-    return [SendCopAdapter()]
+    return [SendCopAdapter(), GovUkSendAdapter()]
 
 
 def write_documents(docs: Iterable[Document], out_dir: Path) -> int:
