@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "senlit-retrieval"
+name = "uk-sen-guide"
 version = "0.1.0"
 description = "Hybrid retrieval (BM25 + dense + cross-encoder rerank) over UK Special Educational Needs guidance"
 requires-python = ">=3.11"

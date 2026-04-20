@@ -10,7 +10,7 @@ Retrieval composes BM25 (`bm25s`), dense embeddings (`BAAI/bge-large-en-v1.5`, s
 
 ## Evaluation — 43 graded queries × 3 configs
 
-Ground truth uses open-schema matchers against chunk metadata (`source`, `section_ref`, `section_ref_prefix`, `local_authority`, `charity`, `text_contains` as list-AND), with graded relevance (0/1/2). I authored every query and every matcher. Metrics — Precision@5, Recall@5, NDCG@5 — implemented directly in `src/senlit_retrieval/eval/metrics.py` for transparency over wrapping `ranx`.
+Ground truth uses open-schema matchers against chunk metadata (`source`, `section_ref`, `section_ref_prefix`, `local_authority`, `charity`, `text_contains` as list-AND), with graded relevance (0/1/2). I authored every query and every matcher. Metrics — Precision@5, Recall@5, NDCG@5 — implemented directly in `src/uk_sen_guide/eval/metrics.py` for transparency over wrapping `ranx`.
 
 | Config | P@5 | R@5 | NDCG@5 | p50 latency | p95 latency |
 |---|---|---|---|---|---|

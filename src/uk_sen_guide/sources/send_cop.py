@@ -24,7 +24,7 @@ from .base import SourceAdapter
 log = logging.getLogger(__name__)
 
 GOV_UK_LANDING = "https://www.gov.uk/government/publications/send-code-of-practice-0-to-25"
-USER_AGENT = "senlit-retrieval/0.1 (take-home assessment research)"
+USER_AGENT = "uk-sen-guide/0.1 (take-home assessment research)"
 
 # Numbered-section pattern: "1.1", "11.45", "A1.2", ... at start of a line.
 # Heading must start with a capital and be reasonably short (< ~120 chars).

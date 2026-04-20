@@ -1,4 +1,4 @@
-# Senlit Retrieval evaluation set — graded queries across 6 types.
+# UK SEN Guide evaluation set — graded queries across 6 types.
 #
 # Matcher grammar (all conditions AND'd together):
 #   source:              chunk.metadata.source exact

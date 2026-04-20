@@ -19,10 +19,10 @@ import yaml
 from rich.console import Console
 from rich.table import Table
 
-from senlit_retrieval.retrieval.bm25_index import Bm25Index
-from senlit_retrieval.retrieval.dense_index import DenseIndex
-from senlit_retrieval.retrieval.reranker import CrossEncoderReranker
-from senlit_retrieval.retrieval.search import SearchService
+from uk_sen_guide.retrieval.bm25_index import Bm25Index
+from uk_sen_guide.retrieval.dense_index import DenseIndex
+from uk_sen_guide.retrieval.reranker import CrossEncoderReranker
+from uk_sen_guide.retrieval.search import SearchService
 
 app = typer.Typer(add_completion=False, no_args_is_help=False)
 console = Console()

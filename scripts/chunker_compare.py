@@ -18,8 +18,8 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from senlit_retrieval.chunking import FixedSizeChunker, HeadingBoundaryChunker
-from senlit_retrieval.models import Document, Section, SourceMetadata
+from uk_sen_guide.chunking import FixedSizeChunker, HeadingBoundaryChunker
+from uk_sen_guide.models import Document, Section, SourceMetadata
 
 console = Console()
 

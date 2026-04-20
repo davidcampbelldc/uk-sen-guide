@@ -24,34 +24,34 @@ from prometheus_client import Counter, Histogram
 
 # ── Custom metrics ────────────────────────────────────────────────────────
 search_requests_total = Counter(
-    "senlit_search_requests_total",
+    "uk_sen_search_requests_total",
     "Search requests by config and status.",
     ["config", "status"],
 )
 
 search_latency_seconds = Histogram(
-    "senlit_search_latency_seconds",
+    "uk_sen_search_latency_seconds",
     "End-to-end search latency by config.",
     ["config"],
     buckets=(0.05, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0, 2.0, 5.0),
 )
 
 search_candidates_pool = Histogram(
-    "senlit_search_candidates_pool",
+    "uk_sen_search_candidates_pool",
     "Size of candidate pool before fusion/rerank.",
     ["config"],
     buckets=(1, 10, 25, 50, 100, 200, 500),
 )
 
 search_results_returned = Histogram(
-    "senlit_search_results_returned",
+    "uk_sen_search_results_returned",
     "Number of results returned per query.",
     ["config"],
     buckets=(0, 1, 3, 5, 10, 25, 50),
 )
 
 reranker_invocations_total = Counter(
-    "senlit_reranker_invocations_total",
+    "uk_sen_reranker_invocations_total",
     "Cross-encoder reranker invocations.",
 )
 
@@ -91,4 +91,4 @@ def configure_logging(level: str = "INFO", json_output: bool = True) -> None:
 
 
 def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
-    return structlog.get_logger(name or "senlit")
+    return structlog.get_logger(name or "uk_sen")

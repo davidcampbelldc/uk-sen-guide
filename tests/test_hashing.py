@@ -1,6 +1,6 @@
 """Hashing tests — stability, sensitivity, and composition."""
 
-from senlit_retrieval.hashing import chunk_id, doc_id, hash_config, hash_text
+from uk_sen_guide.hashing import chunk_id, doc_id, hash_config, hash_text
 
 
 def test_hash_text_deterministic():

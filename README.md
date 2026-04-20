@@ -1,4 +1,4 @@
-# Senlit Retrieval
+# UK SEN Guide
 
 A production-grade hybrid retrieval platform over UK Special Educational
 Needs guidance — the retrieval backbone for a future SEN guidance tool.
@@ -51,16 +51,16 @@ pip install -e ".[dev]"
 docker compose up -d
 
 # 3. Ingest the corpus (PDFs download on first run; cached after)
-python -m senlit_retrieval.ingest
+python -m uk_sen_guide.ingest
 
 # 4. Build BM25 + dense indices
-python -m senlit_retrieval.build_index
+python -m uk_sen_guide.build_index
 
 # 5. Run the evaluation
-python -m senlit_retrieval.eval.run
+python -m uk_sen_guide.eval.run
 
 # 6. Serve the API
-uvicorn senlit_retrieval.api.server:app --port 8000
+uvicorn uk_sen_guide.api.server:app --port 8000
 ```
 
 Health check + first query:
@@ -89,7 +89,7 @@ truth uses open-schema matchers against chunk metadata (source,
 section_ref, local_authority, charity, text-anchor), so the eval set
 survives chunker-config changes without manual re-authoring.
 
-Metric implementations are in `src/senlit_retrieval/eval/metrics.py` —
+Metric implementations are in `src/uk_sen_guide/eval/metrics.py` —
 direct P@5, R@5, NDCG@5 rather than wrapping `ranx`, so there is
 exactly one source of truth for what's being measured.
 
@@ -103,7 +103,7 @@ exactly one source of truth for what's being measured.
 ## Load testing
 
 ```bash
-python -m senlit_retrieval.loadtest --concurrency 20 --duration 30
+python -m uk_sen_guide.loadtest --concurrency 20 --duration 30
 ```
 
 Reports throughput, p50/p95/p99 latency, error rate.
@@ -111,8 +111,8 @@ Reports throughput, p50/p95/p99 latency, error rate.
 ## Repository layout
 
 ```
-senlit-retrieval/
-├── src/senlit_retrieval/
+uk-sen-guide/
+├── src/uk_sen_guide/
 │   ├── models.py              # Document / Chunk / Section / SourceMetadata
 │   ├── chunking.py            # FixedSize + HeadingBoundary chunkers
 │   ├── hashing.py             # Stable IDs (doc_id, chunk_id, config_hash)

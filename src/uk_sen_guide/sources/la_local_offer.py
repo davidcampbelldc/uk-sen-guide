@@ -5,7 +5,7 @@ The SEND Code of Practice requires each Local Authority (LA) to publish a
 domains in their own formats (no common schema). We sample a handful of LAs
 with accessible `/sitemap.xml` and filter for SEN-relevant URL paths.
 
-This is the production value-add for Senlit V2: generalising across 152 LAs.
+This is the production value-add for UK SEN Guide V2: generalising across 152 LAs.
 For the assessment we ship a representative sample and document the variance
 as a finding (see the arch doc / write-up).
 
@@ -34,7 +34,7 @@ from .base import SourceAdapter
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "senlit-retrieval/0.1 (take-home assessment research)"
+USER_AGENT = "uk-sen-guide/0.1 (take-home assessment research)"
 
 
 @dataclass(frozen=True)

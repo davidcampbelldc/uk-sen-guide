@@ -28,7 +28,7 @@ from .sources.send_cop import SendCopAdapter
 
 app = typer.Typer(add_completion=False, no_args_is_help=False)
 console = Console()
-log = logging.getLogger("senlit.ingest")
+log = logging.getLogger("uk_sen.ingest")
 
 
 CHUNKERS: dict[str, type[Chunker]] = {

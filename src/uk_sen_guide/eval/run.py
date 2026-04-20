@@ -1,7 +1,7 @@
 """Eval CLI — run queries across 3 configs, compute metrics, write a report.
 
 Usage:
-    python -m senlit_retrieval.eval.run \
+    python -m uk_sen_guide.eval.run \
         --queries eval/queries.yaml \
         --chunks data/chunks/chunks-<hash>.jsonl \
         --index-dir data/index
@@ -27,7 +27,7 @@ from .queries import Query, load_chunks_jsonl, load_queries
 
 app = typer.Typer(add_completion=False, no_args_is_help=False)
 console = Console()
-log = logging.getLogger("senlit.eval")
+log = logging.getLogger("uk_sen.eval")
 
 CONFIGS: list[SearchConfig] = ["semantic", "hybrid", "hybrid_rerank"]
 
@@ -61,7 +61,7 @@ def run(
     out_dir: Path = typer.Option(Path("eval_runs")),
     qdrant_host: str = typer.Option("localhost"),
     qdrant_port: int = typer.Option(6333),
-    collection: str = typer.Option("senlit_chunks"),
+    collection: str = typer.Option("uk_sen_chunks"),
     configs: list[str] = typer.Option(None, help="Subset of configs to run (default: all 3)"),
     top_k: int = typer.Option(5, help="Results per query"),
     verbose: bool = typer.Option(False, "--verbose", "-v"),

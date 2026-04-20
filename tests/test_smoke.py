@@ -1,7 +1,7 @@
 """Smoke test: package imports cleanly."""
 
-import senlit_retrieval
+import uk_sen_guide
 
 
 def test_version_available():
-    assert senlit_retrieval.__version__
+    assert uk_sen_guide.__version__

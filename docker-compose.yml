@@ -1,7 +1,7 @@
 services:
   qdrant:
     image: qdrant/qdrant:v1.12.4
-    container_name: senlit-qdrant
+    container_name: uk-sen-qdrant
     restart: unless-stopped
     ports:
       - "6333:6333"   # REST

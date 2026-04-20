@@ -30,7 +30,7 @@ from .base import SourceAdapter
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = "senlit-retrieval/0.1 (take-home assessment research)"
+USER_AGENT = "uk-sen-guide/0.1 (take-home assessment research)"
 BASE = "https://www.gov.uk"
 
 # Gov.uk SEN statistics publication landing pages. The adapter scrapes each

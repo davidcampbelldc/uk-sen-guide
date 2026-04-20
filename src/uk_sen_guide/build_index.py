@@ -14,7 +14,7 @@ from .retrieval.dense_index import DenseIndex
 
 app = typer.Typer(add_completion=False, no_args_is_help=False)
 console = Console()
-log = logging.getLogger("senlit.index")
+log = logging.getLogger("uk_sen.index")
 
 
 def _load_chunks(chunks_jsonl: Path) -> list[dict]:
@@ -33,7 +33,7 @@ def run(
     data_root: Path = typer.Option(Path("data"), help="Data root"),
     qdrant_host: str = typer.Option("localhost"),
     qdrant_port: int = typer.Option(6333),
-    collection: str = typer.Option("senlit_chunks"),
+    collection: str = typer.Option("uk_sen_chunks"),
     bm25_only: bool = typer.Option(False, "--bm25-only", help="Skip dense index (useful for dev)"),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ) -> None:
@@ -48,7 +48,7 @@ def run(
         if not jsonls:
             console.print(
                 f"[red]No chunks found under {data_root}/chunks. "
-                f"Run `python -m senlit_retrieval.ingest` first.[/]"
+                f"Run `python -m uk_sen_guide.ingest` first.[/]"
             )
             raise typer.Exit(code=1)
         chunks_path = jsonls[-1]

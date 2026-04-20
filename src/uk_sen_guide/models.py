@@ -1,4 +1,4 @@
-"""Core data models for Senlit Retrieval.
+"""Core data models for UK SEN Guide.
 
 Open-schema metadata throughout — V2 will add filters for local authority,
 age band, condition, and document type without schema migrations.

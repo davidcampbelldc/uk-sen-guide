@@ -1,7 +1,7 @@
 """FastAPI server exposing POST /search over the hybrid retrieval pipeline.
 
 Run with:
-    uvicorn senlit_retrieval.api.server:app --host 0.0.0.0 --port 8000
+    uvicorn uk_sen_guide.api.server:app --host 0.0.0.0 --port 8000
 
 Observability:
     GET /health    — service + index size
@@ -80,16 +80,16 @@ _service: SearchService | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    configure_logging(level=os.environ.get("SENLIT_LOG_LEVEL", "INFO"))
+    configure_logging(level=os.environ.get("UK_SEN_LOG_LEVEL", "INFO"))
     global _service
-    index_dir = Path(os.environ.get("SENLIT_INDEX_DIR", "data/index"))
+    index_dir = Path(os.environ.get("UK_SEN_INDEX_DIR", "data/index"))
     log.info("service.startup", phase="loading-indices", index_dir=str(index_dir))
     bm25 = Bm25Index()
     bm25.load(index_dir / "bm25")
     dense = DenseIndex(
-        collection=os.environ.get("SENLIT_QDRANT_COLLECTION", "senlit_chunks"),
-        qdrant_host=os.environ.get("SENLIT_QDRANT_HOST", "localhost"),
-        qdrant_port=int(os.environ.get("SENLIT_QDRANT_PORT", "6333")),
+        collection=os.environ.get("UK_SEN_QDRANT_COLLECTION", "uk_sen_chunks"),
+        qdrant_host=os.environ.get("UK_SEN_QDRANT_HOST", "localhost"),
+        qdrant_port=int(os.environ.get("UK_SEN_QDRANT_PORT", "6333")),
     )
     reranker = CrossEncoderReranker()
     _service = SearchService(bm25=bm25, dense=dense, reranker=reranker)
@@ -103,7 +103,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Senlit Retrieval",
+    title="UK SEN Guide",
     description="Hybrid retrieval (BM25 + dense + cross-encoder rerank) over UK SEN guidance.",
     version="0.1.0",
     lifespan=lifespan,

@@ -28,7 +28,7 @@ from sentence_transformers import SentenceTransformer
 log = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "BAAI/bge-large-en-v1.5"
-DEFAULT_COLLECTION = "senlit_chunks"
+DEFAULT_COLLECTION = "uk_sen_chunks"
 DEFAULT_VECTOR_DIM = 1024
 
 

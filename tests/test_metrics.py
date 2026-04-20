@@ -1,6 +1,6 @@
 """Metric computation tests."""
 
-from senlit_retrieval.eval.metrics import (
+from uk_sen_guide.eval.metrics import (
     ndcg_at_k,
     precision_at_k,
     recall_at_k,

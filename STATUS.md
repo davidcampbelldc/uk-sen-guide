@@ -14,37 +14,28 @@ Living dashboard — updated on every significant commit. Run `git log
 - Repo scaffolded with clean-room pre-commit + commit-msg hooks
 - **Ingest**: 1,215 docs · 8,691 chunks · 6.6 MB text · 4 doc types (PDF / HTML / XLSX / text)
 - **Sources covered**: SEND Code of Practice · 142 gov.uk SEND pages · 113 DfE stats workbooks · 484 Local Offer pages across 15 LAs · 399 IPSEA articles · 76 Contact guides
-- **BM25 index**: built and persisted
-- **Retrieval layer**: BM25 · dense (BGE-large) · cross-encoder rerank · weighted-normalised-sum / RRF fusion · three composable configs (semantic / hybrid / hybrid_rerank)
+- **Retrieval layer**: BM25 · dense (BGE-large, 8,661 points in Qdrant) · cross-encoder rerank · weighted-normalised-sum / RRF fusion · three composable configs
 - **API**: FastAPI `POST /search` with per-retriever score breakdown · `GET /health` · `GET /metrics`
 - **Observability**: `structlog` JSON logs with `query_id` correlation · Prometheus counters + histograms
-- **Eval harness**: P@5 / R@5 / NDCG@5 · 20 graded queries across 5 types
-- **Async load test CLI**: reports throughput + p50/p95/p99 + error rate
-- **Deliverable docs**: `docs/architecture.md`, `docs/ROADMAP.md`, `docs/AI_USAGE.md`, `docs/ATTRIBUTIONS.md`
-- **Tests**: 31 green (hashing · chunking · fusion · metrics)
+- **Eval harness + 43 graded queries**: P@5 / R@5 / NDCG@5 across 7 query types
+- **Async load test CLI**: 20 concurrent clients, 0 errors, p95 ≤ 2.3s
+- **Hard-mode signals**: cold/warm latency profile · chunker structural comparison · cost per 1,000 queries
+- **Deliverable docs**: `README.md` · `docs/REPORT.md` (filled with real numbers) · `docs/architecture.md` · `docs/ROADMAP.md` · `docs/AI_USAGE.md` · `docs/ATTRIBUTIONS.md`
+- **Tests**: 31 green (hashing · chunking · fusion · metrics) · ruff clean
+- **Phase 1 scrub in progress**: package + code rename to `uk-sen-guide` underway
 
 ## In flight 🔄
 
-- Dense embedding + Qdrant upsert (BGE-large on CPU · 8,691 chunks · ~25 min so far)
-- Eval query expansion 20 → 35
-- README first-impression polish
-- Report shell awaiting eval numbers
+- **Phase 1** — final verification after rename (tests, ruff, fresh-venv check, GitHub repo rename, local dir rename)
+- **Phase 2** — basic RAG answer generation + web chat UI + safeguarding (next)
 
-## Next
+## Next (4-phase plan)
 
-1. Wait for dense index completion
-2. Run eval across all 3 configs → first real P@5 / R@5 / NDCG numbers
-3. Run cold-cache vs warm-cache latency profile
-4. Start API, run concurrency load test at 20 concurrent
-5. Fill eval numbers into `docs/REPORT.md`
-6. Pre-submission check (every README command in fresh venv)
-7. Push, invite reviewer as collaborator, submit
+- **Phase 2** — RAG + web chat UI + safeguarding · 4-5h · beyond Assignment 1
+- **Phase 3** — Minimal agent layer (5 SEN-useful tools + planning + parallel + budget) · 2-3h · maps to Assignment 2 pattern
+- **Phase 4** — Minimal conversation context optimizer · 1-2h stretch · maps to Assignment 3 pattern
+- **Final** — pre-submission check, invite reviewer, send submission email
 
 ## Blockers
 
 None.
-
-## Deferred (Wednesday scrub commit)
-
-- Rename project: `senlit-retrieval` → `uk-sen-guide` (repo + local dir + Python package + docs + code + User-Agent strings). Single atomic commit.
-- Remove working-codename references throughout. Private repo until then.

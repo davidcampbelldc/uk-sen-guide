@@ -1,6 +1,6 @@
 """Fusion strategy tests."""
 
-from senlit_retrieval.retrieval.fusion import rrf_fuse, weighted_fuse
+from uk_sen_guide.retrieval.fusion import rrf_fuse, weighted_fuse
 
 
 def test_weighted_fuse_prefers_consensus():

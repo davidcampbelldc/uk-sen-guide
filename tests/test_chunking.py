@@ -2,8 +2,8 @@
 
 from datetime import UTC, datetime
 
-from senlit_retrieval.chunking import FixedSizeChunker, HeadingBoundaryChunker
-from senlit_retrieval.models import Document, Section, SourceMetadata
+from uk_sen_guide.chunking import FixedSizeChunker, HeadingBoundaryChunker
+from uk_sen_guide.models import Document, Section, SourceMetadata
 
 
 def _make_doc(body: str, sections: list[Section] | None = None) -> Document:

@@ -1,7 +1,7 @@
 """Simple async concurrent load test against a running /search endpoint.
 
 Usage:
-    python -m senlit_retrieval.loadtest \
+    python -m uk_sen_guide.loadtest \
         --url http://localhost:8000/search \
         --queries-file eval/queries.yaml \
         --concurrency 20 \
@@ -30,7 +30,7 @@ from rich.table import Table
 
 app = typer.Typer(add_completion=False, no_args_is_help=False)
 console = Console()
-log = logging.getLogger("senlit.loadtest")
+log = logging.getLogger("uk_sen.loadtest")
 
 
 @dataclass
