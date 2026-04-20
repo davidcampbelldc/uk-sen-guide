@@ -20,6 +20,7 @@ from .chunking import Chunker, FixedSizeChunker, HeadingBoundaryChunker
 from .hashing import hash_config
 from .models import Chunk, Document
 from .sources.base import SourceAdapter
+from .sources.charity_sites import CharitySitesAdapter
 from .sources.dfe_tabular import DfeStatsTabularAdapter
 from .sources.gov_uk_send import GovUkSendAdapter
 from .sources.la_local_offer import LaLocalOfferAdapter
@@ -42,6 +43,7 @@ def available_adapters() -> list[SourceAdapter]:
         GovUkSendAdapter(),
         DfeStatsTabularAdapter(),
         LaLocalOfferAdapter(),
+        CharitySitesAdapter(),
     ]
 
 

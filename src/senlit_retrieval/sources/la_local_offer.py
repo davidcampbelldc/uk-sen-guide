@@ -48,43 +48,29 @@ class LaConfig:
 # Representative sample: mix of urban / rural / regional. All chosen for
 # publicly accessible sitemap.xml. Filter patterns picked to target SEN
 # content; LAs whose sitemaps don't surface SEN paths will yield few pages.
+_COMMON_FILTERS: tuple[str, ...] = (
+    "local-offer", "localoffer", "send", "sen-support", "sen/",
+    "ehcp", "special-educational", "disability", "disabled-children",
+    "educational-needs",
+)
+
 LA_CONFIGS: tuple[LaConfig, ...] = (
-    LaConfig(
-        name="Birmingham",
-        region="West Midlands",
-        sitemap_url="https://www.birmingham.gov.uk/sitemap.xml",
-        url_prefix_filters=("local-offer", "send", "sen-support", "ehcp", "special-educational", "disability"),
-    ),
-    LaConfig(
-        name="Manchester",
-        region="North West",
-        sitemap_url="https://www.manchester.gov.uk/sitemap.xml",
-        url_prefix_filters=("local-offer", "localoffer", "send", "sen", "ehcp", "special-educational", "disability"),
-    ),
-    LaConfig(
-        name="Leeds",
-        region="Yorkshire",
-        sitemap_url="https://www.leeds.gov.uk/sitemap.xml",
-        url_prefix_filters=("local-offer", "localoffer", "send", "sen-support", "ehcp", "special-educational", "disability"),
-    ),
-    LaConfig(
-        name="Hackney",
-        region="Inner London",
-        sitemap_url="https://www.hackney.gov.uk/sitemap.xml",
-        url_prefix_filters=("local-offer", "localoffer", "send", "sen", "ehcp", "special-educational", "disability"),
-    ),
-    LaConfig(
-        name="Newcastle",
-        region="North East",
-        sitemap_url="https://www.newcastle.gov.uk/sitemap.xml",
-        url_prefix_filters=("local-offer", "localoffer", "send", "sen", "ehcp", "special-educational", "disability"),
-    ),
-    LaConfig(
-        name="Croydon",
-        region="Outer London",
-        sitemap_url="https://www.croydon.gov.uk/sitemap.xml",
-        url_prefix_filters=("local-offer", "localoffer", "send", "sen", "ehcp", "special-educational", "disability"),
-    ),
+    LaConfig("Birmingham",  "West Midlands",  "https://www.birmingham.gov.uk/sitemap.xml", _COMMON_FILTERS),
+    LaConfig("Manchester",  "North West",     "https://www.manchester.gov.uk/sitemap.xml", _COMMON_FILTERS),
+    LaConfig("Leeds",       "Yorkshire",      "https://www.leeds.gov.uk/sitemap.xml",      _COMMON_FILTERS),
+    LaConfig("Hackney",     "Inner London",   "https://www.hackney.gov.uk/sitemap.xml",    _COMMON_FILTERS),
+    LaConfig("Newcastle",   "North East",     "https://www.newcastle.gov.uk/sitemap.xml",  _COMMON_FILTERS),
+    LaConfig("Croydon",     "Outer London",   "https://www.croydon.gov.uk/sitemap.xml",    _COMMON_FILTERS),
+    LaConfig("Sheffield",   "Yorkshire",      "https://www.sheffield.gov.uk/sitemap.xml",  _COMMON_FILTERS),
+    LaConfig("Brighton",    "South East",     "https://www.brighton-hove.gov.uk/sitemap.xml", _COMMON_FILTERS),
+    LaConfig("Oxfordshire", "South East",     "https://www.oxfordshire.gov.uk/sitemap.xml",   _COMMON_FILTERS),
+    LaConfig("Bath-NES",    "South West",     "https://www.bathnes.gov.uk/sitemap.xml",    _COMMON_FILTERS),
+    LaConfig("Bradford",    "Yorkshire",      "https://www.bradford.gov.uk/sitemap.xml",   _COMMON_FILTERS),
+    LaConfig("Islington",   "Inner London",   "https://www.islington.gov.uk/sitemap.xml",  _COMMON_FILTERS),
+    LaConfig("Lewisham",    "Inner London",   "https://www.lewisham.gov.uk/sitemap.xml",   _COMMON_FILTERS),
+    LaConfig("Southwark",   "Inner London",   "https://www.southwark.gov.uk/sitemap.xml",  _COMMON_FILTERS),
+    LaConfig("Leicester",   "East Midlands",  "https://www.leicester.gov.uk/sitemap.xml",  _COMMON_FILTERS),
+    LaConfig("Stockport",   "North West",     "https://www.stockport.gov.uk/sitemap.xml",  _COMMON_FILTERS),
 )
 
 _SEN_MARKERS: tuple[str, ...] = (
@@ -113,7 +99,7 @@ class LaLocalOfferAdapter(SourceAdapter):
     def __init__(
         self,
         configs: tuple[LaConfig, ...] = LA_CONFIGS,
-        max_docs_per_la: int = 60,
+        max_docs_per_la: int = 80,
         request_delay_s: float = 0.3,
     ):
         self.configs = configs
