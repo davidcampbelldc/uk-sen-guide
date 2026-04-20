@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project state
+data/
+.qdrant_storage/
+logs/
+*.log
+.scratch/
+secrets/
+.env
+.env.local
+eval_runs/
+
+# Clean-room — hard-block accidental AI tool artefacts
+CLAUDE.md
+.mcp.json
+.claude/
+claude-panic-*
+.claude-*
