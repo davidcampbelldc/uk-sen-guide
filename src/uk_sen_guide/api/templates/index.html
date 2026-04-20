@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UK SEN Guide — Parent Support</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>UK SEN Guide</h1>
+    <p class="sub">Retrieval-backed guidance on UK Special Educational Needs — for parents navigating the system.</p>
+    <p class="warn"><strong>Not legal advice.</strong> For complex cases, contact IPSEA 0800 018 4016.</p>
+  </header>
+
+  <main>
+    <form id="chat-form">
+      <label for="query">Ask a question:</label>
+      <textarea id="query" name="query" rows="3" required
+        placeholder="e.g. How do I appeal a local authority's refusal to conduct an EHC needs assessment?"></textarea>
+      <div class="controls">
+        <button type="submit" id="submit-btn">Ask</button>
+        <select name="config" id="config">
+          <option value="hybrid" selected>hybrid (fast)</option>
+          <option value="hybrid_rerank">hybrid + rerank (slower, sometimes better)</option>
+          <option value="semantic">semantic only</option>
+        </select>
+      </div>
+    </form>
+
+    <section id="results"></section>
+  </main>
+
+  <footer>
+    <p>Data: UK SEN/SEND guidance from GOV.UK (Open Government Licence), DfE statistics, 15 Local Authority Local Offers, IPSEA, Contact — 1,215 documents. Source code: <a href="https://github.com/davidcampbelldc/uk-sen-guide">github.com/davidcampbelldc/uk-sen-guide</a>.</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const results = document.getElementById('results');
+    const btn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = 'Searching...';
+      const query = document.getElementById('query').value.trim();
+      const config = document.getElementById('config').value;
+      if (!query) { btn.disabled = false; btn.textContent = 'Ask'; return; }
+
+      try {
+        const resp = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ query, config }),
+        });
+        const html = await resp.text();
+        results.innerHTML = html + results.innerHTML;
+      } catch (err) {
+        results.innerHTML = `<div class="answer error"><strong>Error:</strong> ${err.message}</div>` + results.innerHTML;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Ask';
+      }
+    });
+  </script>
+</body>
+</html>

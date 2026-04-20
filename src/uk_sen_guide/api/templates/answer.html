@@ -1,0 +1,39 @@
+<article class="answer {% if escalated %}escalated{% endif %} confidence-{{ confidence }}">
+  <header class="answer-head">
+    <span class="query">{{ query }}</span>
+    <span class="meta">
+      {% if confidence != "out_of_scope" %}
+        <span class="pill conf-{{ confidence }}">{{ confidence }} confidence</span>
+      {% endif %}
+      {% if latency_ms %}<span class="pill">{{ latency_ms }}ms</span>{% endif %}
+      {% if cost_gbp is not none and cost_gbp > 0 %}
+        <span class="pill">£{{ "%.4f"|format(cost_gbp) }}</span>
+      {% endif %}
+      <span class="pill">{{ config_used }}</span>
+    </span>
+  </header>
+
+  <div class="answer-body">
+    {{ answer | safe }}
+  </div>
+
+  {% if citations %}
+    <details class="sources">
+      <summary>Sources ({{ citations|length }})</summary>
+      <ol class="citations">
+        {% for c in citations %}
+          <li>
+            <strong>[{{ c.number }}]</strong>
+            <span class="src">{{ c.source }}{% if c.section_ref %} §{{ c.section_ref }}{% endif %}</span>
+            {% if c.url %}&nbsp;·&nbsp;<a href="{{ c.url }}" target="_blank" rel="noopener">source link</a>{% endif %}
+            <blockquote>{{ c.excerpt }}...</blockquote>
+          </li>
+        {% endfor %}
+      </ol>
+    </details>
+  {% endif %}
+
+  <footer class="disclaimer">
+    <strong>Important:</strong> {{ disclaimer }}
+  </footer>
+</article>
