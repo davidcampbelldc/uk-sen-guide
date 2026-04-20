@@ -20,6 +20,7 @@ from .chunking import Chunker, FixedSizeChunker, HeadingBoundaryChunker
 from .hashing import hash_config
 from .models import Chunk, Document
 from .sources.base import SourceAdapter
+from .sources.dfe_tabular import DfeStatsTabularAdapter
 from .sources.gov_uk_send import GovUkSendAdapter
 from .sources.send_cop import SendCopAdapter
 
@@ -35,7 +36,7 @@ CHUNKERS: dict[str, type[Chunker]] = {
 
 
 def available_adapters() -> list[SourceAdapter]:
-    return [SendCopAdapter(), GovUkSendAdapter()]
+    return [SendCopAdapter(), GovUkSendAdapter(), DfeStatsTabularAdapter()]
 
 
 def write_documents(docs: Iterable[Document], out_dir: Path) -> int:
