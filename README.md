@@ -57,6 +57,8 @@ Additional context a reviewer may want:
 
 | File | Purpose |
 |---|---|
+| [`docs/CONCEPTS.md`](docs/CONCEPTS.md) | Plain-English walk-through of the architecture decisions — gentler companion to `architecture.md` for non-specialist readers |
+| [`docs/GLOSSARY.md`](docs/GLOSSARY.md) | Alphabetical definitions of every acronym, model name, and term used across the repo (EHCP, BM25, NDCG@5, reranker, etc.) |
 | [`STATUS.md`](STATUS.md) | Shipped / in-flight / next — sprint-style dashboard |
 | [`docs/ATTRIBUTIONS.md`](docs/ATTRIBUTIONS.md) | Source licences (OGL-3.0 for gov/LA content, charity terms for IPSEA/Contact, MIT for models + libraries) |
 | [`eval_runs/README.md`](eval_runs/README.md) | Raw per-query eval outputs + a 15-line reproducer snippet. Every aggregate in REPORT recomputes from these files to 3 decimal places |
@@ -165,6 +167,8 @@ uk-sen-guide/
 │   ├── architecture.md        # Architecture decisions + rejected alternatives (#3)
 │   ├── ROADMAP.md             # What I'd ship next week (#4)
 │   ├── AI_USAGE.md            # Claude Code disclosure (#5)
+│   ├── CONCEPTS.md            # Plain-English walkthrough of the architecture
+│   ├── GLOSSARY.md            # Every acronym and term, defined
 │   └── ATTRIBUTIONS.md        # Source licences (OGL-3.0 etc.)
 ├── docker-compose.yml         # Qdrant service
 ├── pyproject.toml
