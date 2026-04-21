@@ -36,7 +36,11 @@ logs/
 secrets/
 .env
 .env.local
-eval_runs/
+# Eval outputs are normally large and regenerable, but for this take-home
+# submission the committed eval_runs/ directory is the raw evidence for
+# every aggregate in REPORT.md — reviewer can recompute to 3 dp from the
+# JSONL. Do not re-enable the gitignore without moving the numbers.
+# eval_runs/
 
 # Clean-room — hard-block accidental AI tool artefacts
 CLAUDE.md
