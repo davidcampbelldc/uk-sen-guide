@@ -30,10 +30,10 @@ evaluation-methodology calls.
   text description rather than one-doc-per-row. Each is justified in
   the architecture doc.
 - **Evaluation methodology.** Graded matcher-based qrels; 0/1/2 relevance
-  scale with (2^rel − 1) gain; six query types spanning statutory
-  citation / symptom-driven / process / rights-refusal / out-of-scope;
-  direct implementation of P@5, R@5, NDCG@5. I authored every query and
-  every ground-truth matcher.
+  scale with (2^rel − 1) gain; seven query types spanning statutory
+  citation / symptom-driven / process / timing / rights-refusal /
+  real-parent-scenario / out-of-scope; direct implementation of P@5,
+  R@5, NDCG@5. I authored every query and every ground-truth matcher.
 - **Discipline calls.** SEN-relevance filter (precision over recall in
   the corpus), per-LA metadata schema (forward-compat for a future LA
   filter), reviewer-reproducibility as a first-class constraint
@@ -61,13 +61,15 @@ tool" default:
 
 1. **Eval query candidate generation.** Claude generated candidate
    queries for me to review; I kept, edited, or rejected each. The
-   current 20-query set is the subset I kept after review — every
+   current 43-query set is the subset I kept after review — every
    query survived because it either reflects a real parent question I
    could imagine being asked or tests a specific corner of retrieval
    behaviour (statutory citation matching, out-of-scope behaviour, etc.).
-   Ground-truth matchers are mine: I decided which sources and section
-   anchors count as relevant for each query. I did not ask Claude to
-   generate ground truth.
+   The 8 "real-parent-scenario" queries are mine, written from lived
+   experience of a SEND Tribunal refusal-to-assess appeal — anonymised,
+   no identifying details. Ground-truth matchers are mine throughout:
+   I decided which sources and section anchors count as relevant for
+   each query. I did not ask Claude to generate ground truth.
 2. **Relevance-filter tuning.** The list of SEN-markers used to filter
    off-topic pages from gov.uk search results (`special educational
    need`, `ehcp`, `local offer`, etc.) was brainstormed collaboratively,

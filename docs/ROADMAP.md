@@ -5,24 +5,39 @@ Five features, ordered by impact-per-engineering-day, with the reasoning
 for each. Every item is genuinely sized in days, not hand-waved; I'd
 tackle them in the order shown.
 
-## 1. Answer-generation layer with inline citations (~2 days)
+## 1. Harden + evaluate the synthesis layer (~3 days)
 
-The retrieval API returns ranked chunks with source metadata. Parents
-using this for real don't want chunk lists — they want an answer with
-citations. A thin generation layer on top of retrieval:
+A RAG synthesis layer already ships alongside the retrieval platform as
+a personal demonstrator (see REPORT "Beyond the brief" sidebar): dual
+provider, confidence-gated, five response states, numbered citations,
+GBP cost tracking. What it does *not* have — and what item #1 builds —
+is the eval rigour the retrieval layer gets. Shipping unmeasured LLM
+output to stressed parents is not acceptable; measuring it is the work.
 
-- Takes the top-5 retrieved chunks and synthesises a natural-language
-  answer with **inline citations** to specific `section_ref` / doc_id.
-- Preserves the retrieval layer as standalone (already the intent — the
-  generation layer is a wrapping step, not a rewrite).
-- Honest about confidence: if top scores are low, returns "I couldn't
-  find specific guidance on this" rather than hallucinating.
-- Cost-controlled: gated by per-query token budget; falls back to
-  "return retrieved chunks" when budget exceeded.
+Scope:
 
-**Why this first:** the retrieval quality the eval validates is only
-useful to a parent if it surfaces as an answer. Every other feature on
-this list assumes this layer exists.
+- **Hallucination eval.** A held-out set of (query, corpus, expected
+  answer shape) triples. Every synthesis pass is scored against the
+  retrieved chunks for claim support — is every factual sentence
+  traceable to a cited chunk? Flag unsupported claims as hallucinations.
+  Target: <2% hallucination rate before parent-facing release.
+- **Prompt ablation.** Measure the contribution of each prompt element
+  (warmth instruction, citation format, disclaimer, 250-word cap)
+  against answer quality, cost, and hallucination rate. Keep only
+  elements that earn their place.
+- **Cost regression.** Wire per-call GBP cost into CI. Fail the build
+  if mean cost-per-query drifts above budget on the eval set. Catches
+  prompt-bloat creep.
+- **Failure-state coverage.** Tests for each of the five response
+  states — `high`, `medium`, `low`, `llm_error`, `out_of_scope` —
+  confirming the UI degrades gracefully and citations survive the
+  `llm_error` path.
+- **Provider parity.** Run the hallucination + cost evals against both
+  Anthropic and z.ai providers; document the trade-offs.
+
+**Why this first:** the demonstrator is live code in the repo. Without
+measurement it can't be recommended for real parents. Every other
+feature below assumes the synthesis layer is production-trustable.
 
 ## 2. Query-type classifier with adaptive retrieval config (~1 day)
 
@@ -105,9 +120,12 @@ real usage. One day of work unlocks a continuous-improvement flywheel.
 
 These would be great, but don't fit a single week:
 
-- **UI for parents.** Non-trivial. Needs design, auth, accessibility,
-  safeguarding disclaimers, content warnings on sensitive topics
-  (mental health, exclusions). Weeks of work, not days.
+- **Parent-ready UI.** A minimal web chat UI exists as a demonstrator
+  (see REPORT "Beyond the brief"); what remains out of scope is the
+  real parent-facing build — auth, per-user history, accessibility
+  (WCAG 2.2 AA), content warnings on sensitive topics (mental health,
+  exclusions, safeguarding), moderation, mobile responsiveness,
+  multilingual support. Weeks of focused design + build, not days.
 - **Per-source freshness heartbeat.** LAs update guidance irregularly;
   we'd need a monthly background job with per-source change detection.
   Worthy but not blocking.

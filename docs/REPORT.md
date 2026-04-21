@@ -1,12 +1,24 @@
 # Report — Retrieval Platform over UK SEN Guidance
 
-*≤2 pages. All numbers are real measurements from runs committed to the repo under `eval_runs/`.*
+*Target ≤2 pages per brief. Narrative fits; the tables of real measurements push to page 3. Keeping them in service of the brief's "real numbers, not vibes" signal is the deliberate trade-off. All numbers are real measurements from runs committed to the repo under `eval_runs/` — reviewer can recompute every aggregate below directly from the JSONL.*
 
 ## What I built
 
 A hybrid retrieval platform over **1,215 documents** of UK Special Educational Needs guidance (**8,691 chunks, 6.6 MB text**). The corpus covers all three document types the brief asks for: PDF (SEND Code of Practice 2015, DfE publications), HTML (gov.uk SEND pages, 15 Local Authority Local Offers, IPSEA, Contact), and tabular (113 DfE statistics workbook sheets — modern DfE publishes XLSX; handled as first-class tabular documents).
 
 Retrieval composes BM25 (`bm25s`), dense embeddings (`BAAI/bge-large-en-v1.5`, stored in Qdrant), and cross-encoder rerank (`BAAI/bge-reranker-base`), with tunable weighted-normalised-sum fusion and RRF fallback. Three configurations are exposed via `POST /search` — `semantic`, `hybrid`, `hybrid_rerank` — each returning top-5 with per-retriever score breakdown. FastAPI server, Prometheus `/metrics`, structured JSON logs with `query_id` correlation. Async load-test CLI. 31 unit tests, `ruff` clean.
+
+### Beyond the brief (shipped as demonstrator, not evaluated here)
+
+Alongside the graded retrieval layer sits a small RAG synthesis layer and a minimal web chat UI — included to show the retrieval is load-bearing for a real parent-facing product, not evaluated as part of this submission:
+
+- **Dual-provider abstraction** — Anthropic Claude and z.ai GLM (OpenAI-compatible) behind one interface; provider selected at startup from env vars, switchable without code change.
+- **Confidence gating** — fused score below threshold skips the LLM and returns a deterministic IPSEA-escalation message, saving cost and avoiding hallucination on weak retrievals.
+- **Five response states** — `high` / `medium` / `low` / `llm_error` / `out_of_scope` — the `llm_error` state preserves retrieved citations so the UI can still surface what retrieval found when the LLM call fails.
+- **Numbered inline citations** tied to specific chunk IDs + source + section anchors.
+- **Per-call GBP cost tracking** — token usage × provider rate, logged per request.
+
+None of this layer contributes to the retrieval numbers below; hallucination eval, prompt ablation, and failure-state coverage are on the roadmap (item #1, ~3 days).
 
 ## Evaluation — 43 graded queries × 3 configs
 
@@ -110,8 +122,7 @@ On evaluation methodology: **matcher-based qrels are conservative.** The gap bet
 ## Honest failure modes
 
 - **Not production-ready for real parents.** 30% P@5 means 3-4 of every 5 shown results are off-target. Statutory NDCG of 0.13 on queries with the highest stakes (legal rights, deadlines) is not acceptable for deployed use. See `docs/ROADMAP.md` for the ordered path to parent-readiness.
-- **No answer generation.** By design (Assignment 1 is retrieval). ROADMAP item #1 is the 2-day build to add synthesis with inline citations. Without it this is research-hours-saved, not an answer.
-- **No confidence gating.** Every query returns 5 results at the same visual weight. Low-confidence queries should trigger "contact IPSEA helpline 0800 018 4016" rather than showing weak matches. ROADMAP item #3.
+- **Synthesis layer exists but is not evaluated.** A demonstrator RAG layer ships alongside (see "Beyond the brief" above) — confidence-gated, cited, cost-tracked — but hallucination rate, prompt ablation, cost regression, and failure-state coverage are not measured in this submission. ROADMAP item #1 is the ~3-day build to treat that layer with the same eval rigour as retrieval. Without those measurements, the synthesis is illustrative, not production-trustable.
 - **XLSX schema detection is heuristic** — complex multi-row DfE headers occasionally mis-identify the header row.
 - **LA coverage is skewed** — 3 docs for Leicester, 80 for Lewisham. Bespoke adapters needed for full rollout.
 
@@ -119,7 +130,7 @@ On evaluation methodology: **matcher-based qrels are conservative.** The gap bet
 
 See `docs/ROADMAP.md` for the ordered 5-item plan. Headline:
 
-1. **Answer generation with inline citations** (2 days) — turns retrieval into parent-usable output
+1. **Harden + evaluate the synthesis layer** (~3 days) — hallucination eval, prompt ablation, cost regression, failure-state coverage; turns the demonstrator into a measured, production-trustable component
 2. **Query-type classifier with adaptive config** (1 day) — closes the per-type gaps the eval exposes
 3. **Per-LA topic normalisation** (2 days) — addresses the fragmentation problem exposed by this sample
 4. **Reranker quantisation + domain adaptation** (2 days) — makes rerank *help* instead of hurt

@@ -3,10 +3,12 @@
 A production-grade hybrid retrieval platform over UK Special Educational
 Needs guidance — the retrieval backbone for a future SEN guidance tool.
 
-**This repo is the retrieval layer.** Answer generation, UI, and real
-user-facing concerns (auth, privacy, disclaimers) are deliberately
-out of scope — documented in `docs/ROADMAP.md` as *"what I'd ship
-next week."* Here we evaluate retrieval itself with rigour.
+**The retrieval layer is what this assignment asks for and what is
+evaluated here.** A confidence-gated RAG synthesis layer and a minimal
+web chat UI ship alongside as a personal demonstrator — documented
+but not part of the graded eval. Real user-facing concerns (auth,
+privacy beyond disclaimers, accessibility, moderation) remain out of
+scope — documented in `docs/ROADMAP.md` as *"what I'd ship next week."*
 
 ## What this is
 
@@ -25,8 +27,8 @@ The `/search` API composes **BM25** (`bm25s`), **dense embeddings**
 (`BAAI/bge-large-en-v1.5`, stored in Qdrant) and an optional
 **cross-encoder rerank** (`BAAI/bge-reranker-base`), with tunable
 fusion weights. Three configurations are evaluated head-to-head —
-`semantic`, `hybrid`, `hybrid_rerank` — on 35 graded queries with
-Precision@5, Recall@5 and NDCG@5.
+`semantic`, `hybrid`, `hybrid_rerank` — on 43 graded queries across
+seven query types with Precision@5, Recall@5 and NDCG@5.
 
 ## Why this corpus
 
@@ -83,11 +85,14 @@ Response includes a **per-retriever score breakdown** (`bm25`,
 
 ## Evaluation
 
-35 graded queries across six types: `statutory-citation`, `symptom-
-driven`, `process`, `timing`, `rights-refusal`, `out-of-scope`. Ground
-truth uses open-schema matchers against chunk metadata (source,
-section_ref, local_authority, charity, text-anchor), so the eval set
-survives chunker-config changes without manual re-authoring.
+43 graded queries across seven types: `statutory-citation`, `symptom-
+driven`, `process`, `timing`, `rights-refusal`, `real-parent-scenario`,
+`out-of-scope`. Ground truth uses open-schema matchers against chunk
+metadata (source, section_ref, local_authority, charity, text-anchor),
+so the eval set survives chunker-config changes without manual
+re-authoring. Raw per-query run outputs are committed under
+`eval_runs/` — reviewers can recompute every aggregate in the REPORT
+from those files directly.
 
 Metric implementations are in `src/uk_sen_guide/eval/metrics.py` —
 direct P@5, R@5, NDCG@5 rather than wrapping `ranx`, so there is

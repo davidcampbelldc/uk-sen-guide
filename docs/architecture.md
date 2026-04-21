@@ -230,7 +230,64 @@ reported separately.
 | Broad LA coverage vs. depth | 15 LAs sampled, variable depth | Deep coverage of 3 LAs | Demonstrates the 152-LA variance problem — the real-world differentiator |
 | Relevance filter precision vs. recall | Precision-forward | Broad recall | Tight SEN-markers set beats broad-match; off-topic pages kill evaluation quality |
 
-## 9. What's next
+## 9. Beyond the core: synthesis layer (not evaluated)
+
+A small RAG synthesis layer and a minimal web chat UI ship alongside
+the graded retrieval platform — built as a personal demonstrator to
+show the retrieval is load-bearing for a real parent-facing product,
+not evaluated as part of this submission. Called out separately from
+the core architecture because none of it contributes to the retrieval
+numbers in the REPORT.
+
+**Layout.**
+
+```
+          ┌───────────────────────┐
+          │  POST /synthesize     │  minimal web chat UI
+          │  (FastAPI)            │
+          └──────────┬────────────┘
+                     │
+          ┌──────────▼────────────┐
+          │  RagSynthesizer       │
+          │   · confidence gate   │──── below threshold → IPSEA escalation
+          │   · provider select   │
+          │   · citation builder  │
+          │   · GBP cost tracker  │
+          └──────────┬────────────┘
+                     │
+      ┌──────────────┴──────────────┐
+      ▼                             ▼
+┌──────────────┐              ┌──────────────┐
+│  Anthropic   │              │  z.ai GLM    │
+│   Claude     │              │ (OpenAI-     │
+│   (Sonnet)   │              │  compatible) │
+└──────────────┘              └──────────────┘
+```
+
+**Design choices.**
+
+| Concern | Choice | Why |
+|---|---|---|
+| Provider abstraction | Minimal `_Provider` base → `_AnthropicProvider` + `_ZaiProvider` | Keeps switching provider to an env-var change — no code path divergence at call sites. |
+| Provider selection | Startup, via env vars, Anthropic preferred | Deterministic; fail-loud if none set rather than silently degrading. |
+| z.ai endpoint | `/api/coding/paas/v4` default | z.ai splits pay-per-call from the coding plan; coding-plan endpoint is what a subscribed account has balance on. |
+| Confidence gate | Fused score < 0.30 → skip LLM, return IPSEA escalation | Saves cost; avoids hallucination on weak retrievals; surfaces the system's epistemic limit rather than hiding it. |
+| Response states | `high` / `medium` / `low` / `llm_error` / `out_of_scope` | `llm_error` distinct from `low` — when the LLM call fails, retrieval still worked, so citations survive and the UI shows sources. |
+| Citations | Numbered `[1]`, `[2]`, tied to chunk_id + source + section_ref | Every factual claim must be citable; the citation payload is what the UI renders as expandable source panels. |
+| Cost tracking | Per-call token × provider rate, GBP | Observable on every request; feeds the eventual cost-regression check (ROADMAP #1). |
+| Disclaimer | Fixed text appended to every high/medium answer | "Information, not legal advice" — non-negotiable for SEN. |
+
+**What's deliberately missing — deferred to ROADMAP #1:**
+
+- Hallucination eval (no held-out claim-support tests)
+- Prompt ablation (no measurement of which prompt elements earn their place)
+- Cost regression wired into CI
+- Failure-state test coverage beyond smoke tests
+- Provider-parity measurement (Anthropic vs z.ai on the same corpus)
+
+The layer works; it is not yet *measured* to the standard the retrieval layer is. That gap is explicit.
+
+## 10. What's next
 
 See `docs/ROADMAP.md` ("What I'd ship next week") for the prioritised
 list. Highlights:
@@ -240,7 +297,8 @@ list. Highlights:
 - Quantised reranker for sub-200ms `hybrid_rerank`.
 - Per-source incremental re-embed check (hash compare on the source
   document level, not just the network cache).
-- Answer-generation layer with inline citations (retrieval stays
-  standalone — this is a wrapping step).
+- Harden + evaluate the synthesis layer (hallucination eval, prompt
+  ablation, cost regression, failure-state coverage) — the
+  demonstrator exists; the eval rigour does not, yet.
 - Per-LA normalisation classifier to surface equivalent guidance
   across 152 LAs.

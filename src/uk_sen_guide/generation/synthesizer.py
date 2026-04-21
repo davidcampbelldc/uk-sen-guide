@@ -4,9 +4,11 @@ Supports two LLM providers, chosen at startup based on env vars:
 
   * **Anthropic Claude** — set `ANTHROPIC_API_KEY`.
     Default model: `claude-sonnet-4-6`. Override with `UK_SEN_ANTHROPIC_MODEL`.
-  * **z.ai / GLM** (OpenAI-compatible) — set `Z_AI_API_KEY`.
+  * **z.ai / GLM** (OpenAI-compatible) — set `Z_AI_API_KEY` (or `ZAI_API_KEY`).
     Default model: `glm-4.6`. Override with `UK_SEN_ZAI_MODEL`.
-    Base URL override: `UK_SEN_ZAI_BASE_URL`.
+    Base URL override: `UK_SEN_ZAI_BASE_URL`. Default base URL targets the
+    coding-plan endpoint (`/api/coding/paas/v4`) — the pay-per-call endpoint
+    (`/api/paas/v4`) requires a separate top-up balance.
 
 If both env vars are set, Anthropic is preferred. If neither is set, the
 synthesizer degrades gracefully and returns a fixed escalation message
@@ -39,7 +41,7 @@ CONFIDENCE_THRESHOLD = 0.30  # top fused score below → skip LLM, escalate
 # ── Provider defaults ─────────────────────────────────────────────────────
 ANTHROPIC_DEFAULT_MODEL = "claude-sonnet-4-6"
 ZAI_DEFAULT_MODEL = "glm-4.6"
-ZAI_DEFAULT_BASE_URL = "https://api.z.ai/api/paas/v4/"
+ZAI_DEFAULT_BASE_URL = "https://api.z.ai/api/coding/paas/v4"
 
 DISCLAIMER = (
     "This is general information based on public UK SEND guidance — not legal advice. "
@@ -63,9 +65,9 @@ LLM_ERROR_MESSAGE = (
 
 NO_API_KEY_MESSAGE = (
     "Answer synthesis is disabled — no LLM API key set. Set either ANTHROPIC_API_KEY "
-    "(uses Claude Sonnet 4.6) or Z_AI_API_KEY (uses GLM-4.6 via z.ai's OpenAI-compatible "
-    "endpoint) to enable cited natural-language answers. Raw retrieval results are still "
-    "available via POST /search."
+    "(uses Claude Sonnet 4.6) or Z_AI_API_KEY / ZAI_API_KEY (uses GLM-4.6 via z.ai's "
+    "OpenAI-compatible endpoint) to enable cited natural-language answers. Raw retrieval "
+    "results are still available via POST /search."
 )
 
 SYSTEM_PROMPT = (
@@ -170,6 +172,18 @@ class _ZaiProvider(_Provider):
         text = (resp.choices[0].message.content or "").strip()
         input_tokens = resp.usage.prompt_tokens if resp.usage else 0
         output_tokens = resp.usage.completion_tokens if resp.usage else 0
+        # GLM-4.6 / GLM-5 on the coding endpoint are reasoning models: they
+        # emit `reasoning_content` and, if max_tokens is tight, spend the
+        # whole budget on reasoning and leave `content` empty. Treat that as
+        # an LLM error so the caller escalates with citations intact, rather
+        # than shipping a blank answer.
+        if not text:
+            raise RuntimeError(
+                f"provider=z.ai model={self.model} returned empty content "
+                f"(input_tokens={input_tokens}, output_tokens={output_tokens}) — "
+                f"likely reasoning-budget exhaustion; raise max_tokens or "
+                f"disable thinking"
+            )
         return text, input_tokens, output_tokens
 
 
@@ -181,14 +195,16 @@ def _select_provider() -> _Provider | None:
         log.info("synthesis provider=anthropic model=%s", model)
         return _AnthropicProvider(anthropic_key, model)
 
-    zai_key = os.environ.get("Z_AI_API_KEY")
+    zai_key = os.environ.get("Z_AI_API_KEY") or os.environ.get("ZAI_API_KEY")
     if zai_key:
         model = os.environ.get("UK_SEN_ZAI_MODEL", ZAI_DEFAULT_MODEL)
         base_url = os.environ.get("UK_SEN_ZAI_BASE_URL", ZAI_DEFAULT_BASE_URL)
         log.info("synthesis provider=z.ai model=%s base_url=%s", model, base_url)
         return _ZaiProvider(zai_key, model, base_url)
 
-    log.warning("No ANTHROPIC_API_KEY or Z_AI_API_KEY set — synthesis disabled")
+    log.warning(
+        "No ANTHROPIC_API_KEY or Z_AI_API_KEY / ZAI_API_KEY set — synthesis disabled"
+    )
     return None
 
 
