@@ -142,14 +142,19 @@ complexity and gains nothing measurable.
 
 ## 5. Retrieval pipeline
 
-Three configurations share the same `SearchResult` shape so the eval
+Four configurations share the same `SearchResult` shape so the eval
 harness (and the API caller) can treat them uniformly:
 
 | Config | Retrievers | Fusion | Rerank | Target latency |
 |---|---|---|---|---|
+| `bm25` | BM25 only (lexical baseline) | n/a | no | <10ms |
 | `semantic` | dense only | n/a | no | <200ms |
 | `hybrid` | BM25 + dense | weighted-normalised-sum (default) or RRF | no | <200ms |
 | `hybrid_rerank` | BM25 + dense | weighted / RRF | cross-encoder over top-50 | <500ms |
+
+The `bm25` config exists as its own first-class endpoint so that the
+eval harness can answer *"when does BM25 beat semantic?"* directly
+rather than having to infer it from hybrid-minus-semantic deltas.
 
 **Weighted fusion.** Each retriever's scores are min-max normalised to
 [0,1] then summed with tunable weights (default 0.35 BM25, 0.65 dense).
@@ -187,9 +192,10 @@ than via `ranx` so there is exactly one source of truth for what is
 being measured. NDCG uses the `(2^rel - 1)` gain function with
 `log2(rank + 1)` position discount.
 
-**Configurations compared.** All three retrieval configs are evaluated
-on every query; results are reported side-by-side with a per-query-type
-breakdown. Latency distribution (p50, p95) is captured per config.
+**Configurations compared.** All four retrieval configs (`bm25`,
+`semantic`, `hybrid`, `hybrid_rerank`) are evaluated on every query;
+results are reported side-by-side with a per-query-type breakdown.
+Latency distribution (p50, p95) is captured per config.
 
 *See the Evaluation Results section of the main README for numbers.*
 
@@ -243,8 +249,8 @@ numbers in the REPORT.
 
 ```
           ┌───────────────────────┐
-          │  POST /synthesize     │  minimal web chat UI
-          │  (FastAPI)            │
+          │  POST /chat           │  minimal web chat UI
+          │  (FastAPI + HTML)     │
           └──────────┬────────────┘
                      │
           ┌──────────▼────────────┐

@@ -17,7 +17,7 @@ Living dashboard — updated on every significant commit. Run `git log
 - **Retrieval layer**: BM25 · dense (BGE-large, 8,661 points in Qdrant) · cross-encoder rerank · weighted-normalised-sum / RRF fusion · three composable configs
 - **API**: FastAPI `POST /search` with per-retriever score breakdown · `GET /health` · `GET /metrics`
 - **Observability**: `structlog` JSON logs with `query_id` correlation · Prometheus counters + histograms
-- **Eval harness + 43 graded queries × 3 configs**: P@5 / R@5 / NDCG@5 across 7 query types · raw run outputs committed under `eval_runs/`
+- **Eval harness + 43 graded queries × 4 configs** (`bm25` / `semantic` / `hybrid` / `hybrid_rerank`): P@5 / R@5 / NDCG@5 across 7 query types · raw run outputs committed under `eval_runs/`
 - **Async load test CLI**: 20 concurrent clients, 0 errors, p95 ≤ 2.3s
 - **Hard-mode signals**: cold/warm latency profile · chunker structural comparison · cost per 1,000 queries
 - **Deliverable docs**: `README.md` · `docs/REPORT.md` (filled with real numbers) · `docs/architecture.md` · `docs/ROADMAP.md` · `docs/AI_USAGE.md` · `docs/ATTRIBUTIONS.md`

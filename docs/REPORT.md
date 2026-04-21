@@ -6,7 +6,7 @@
 
 A hybrid retrieval platform over **1,215 documents** of UK Special Educational Needs guidance (**8,691 chunks, 6.6 MB text**). The corpus covers all three document types the brief asks for: PDF (SEND Code of Practice 2015, DfE publications), HTML (gov.uk SEND pages, 15 Local Authority Local Offers, IPSEA, Contact), and tabular (113 DfE statistics workbook sheets — modern DfE publishes XLSX; handled as first-class tabular documents).
 
-Retrieval composes BM25 (`bm25s`), dense embeddings (`BAAI/bge-large-en-v1.5`, stored in Qdrant), and cross-encoder rerank (`BAAI/bge-reranker-base`), with tunable weighted-normalised-sum fusion and RRF fallback. Three configurations are exposed via `POST /search` — `semantic`, `hybrid`, `hybrid_rerank` — each returning top-5 with per-retriever score breakdown. FastAPI server, Prometheus `/metrics`, structured JSON logs with `query_id` correlation. Async load-test CLI. 31 unit tests, `ruff` clean.
+Retrieval composes BM25 (`bm25s`), dense embeddings (`BAAI/bge-large-en-v1.5`, stored in Qdrant), and cross-encoder rerank (`BAAI/bge-reranker-base`), with tunable weighted-normalised-sum fusion and RRF fallback. Four configurations are exposed via `POST /search` — `bm25`, `semantic`, `hybrid`, `hybrid_rerank` — each returning top-5 with per-retriever score breakdown. FastAPI server, Prometheus `/metrics`, structured JSON logs with `query_id` correlation. Async load-test CLI. 31 unit tests, `ruff` clean.
 
 ### Beyond the brief (shipped as demonstrator, not evaluated here)
 

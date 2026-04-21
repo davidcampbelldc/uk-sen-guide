@@ -26,9 +26,9 @@ text) drawn from five source families:
 The `/search` API composes **BM25** (`bm25s`), **dense embeddings**
 (`BAAI/bge-large-en-v1.5`, stored in Qdrant) and an optional
 **cross-encoder rerank** (`BAAI/bge-reranker-base`), with tunable
-fusion weights. Three configurations are evaluated head-to-head —
-`semantic`, `hybrid`, `hybrid_rerank` — on 43 graded queries across
-seven query types with Precision@5, Recall@5 and NDCG@5.
+fusion weights. Four configurations are evaluated head-to-head —
+`bm25`, `semantic`, `hybrid`, `hybrid_rerank` — on 43 graded queries
+across seven query types with Precision@5, Recall@5 and NDCG@5.
 
 ## Why this corpus
 
@@ -39,6 +39,28 @@ different formats. Parents navigating the system need both statutory
 citations and LA-specific answers. Building the retrieval layer
 properly here matters, and the assessment was a clean forcing function
 to measure it honestly — so the corpus is real rather than synthetic.
+
+## Documentation
+
+Reviewers — the LEC brief asks for five deliverables. Here's where each
+one lives and what it covers:
+
+| # | Deliverable (LEC brief) | File | What's in it |
+|---|---|---|---|
+| 1 | GitHub repository — main runnable, README, tests passing | this README + `src/`, `tests/`, `pyproject.toml`, `docker-compose.yml` | Setup in 5 commands; 31 tests pass; `ruff` clean; runs on a laptop |
+| 2 | Written report (≤2pp) | [`docs/REPORT.md`](docs/REPORT.md) | What I built · real measurements from `eval_runs/` · what broke · what I learnt · honest failure modes |
+| 3 | Architecture decisions | [`docs/architecture.md`](docs/architecture.md) | System overview with diagrams · technology choices + why · rejected alternatives + why not · data/retrieval/synthesis pipelines · performance budget · trade-offs summary |
+| 4 | "What I'd ship next week" | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Five concrete features sized in days, ordered by impact-per-engineering-day, with reasoning · explicit out-of-scope list |
+| 5 | AI-usage note | [`docs/AI_USAGE.md`](docs/AI_USAGE.md) | What I owned · what Claude wrote · AI uses that directly affect the artefact · how I verified · what surprised me |
+
+Additional context a reviewer may want:
+
+| File | Purpose |
+|---|---|
+| [`STATUS.md`](STATUS.md) | Shipped / in-flight / next — sprint-style dashboard |
+| [`docs/ATTRIBUTIONS.md`](docs/ATTRIBUTIONS.md) | Source licences (OGL-3.0 for gov/LA content, charity terms for IPSEA/Contact, MIT for models + libraries) |
+| [`eval_runs/README.md`](eval_runs/README.md) | Raw per-query eval outputs + a 15-line reproducer snippet. Every aggregate in REPORT recomputes from these files to 3 decimal places |
+| [`eval/queries.yaml`](eval/queries.yaml) | The 43 graded queries with matcher-based ground truth |
 
 ## Quick start
 
@@ -128,19 +150,21 @@ uk-sen-guide/
 │   │   ├── la_local_offer.py
 │   │   └── charity_sites.py
 │   ├── retrieval/             # BM25 + dense + rerank + fusion + orchestrator
+│   ├── generation/            # RAG synthesis layer (demonstrator — not evaluated)
 │   ├── eval/                  # Graded queries + P/R/NDCG + CLI
-│   ├── api/server.py          # FastAPI /search + /health + /metrics
+│   ├── api/server.py          # FastAPI /search + /health + /metrics + /chat (minimal web UI)
 │   ├── observability.py       # structlog + Prometheus
 │   ├── ingest.py              # Ingest CLI
 │   ├── build_index.py         # Index-build CLI
 │   └── loadtest.py            # Concurrency load test CLI
 ├── tests/                     # hashing · chunking · fusion · metrics
-├── eval/queries.yaml          # Graded queries
+├── eval/queries.yaml          # 43 graded queries with matcher-based qrels
+├── eval_runs/                 # Raw per-query eval outputs (committed for reproducibility)
 ├── docs/
-│   ├── architecture.md        # Architecture decisions + rejected alternatives
-│   ├── ROADMAP.md             # What I'd ship next week
-│   ├── REPORT.md              # ≤2pp written report
-│   ├── AI_USAGE.md            # Claude Code disclosure
+│   ├── REPORT.md              # Written report (deliverable #2)
+│   ├── architecture.md        # Architecture decisions + rejected alternatives (#3)
+│   ├── ROADMAP.md             # What I'd ship next week (#4)
+│   ├── AI_USAGE.md            # Claude Code disclosure (#5)
 │   └── ATTRIBUTIONS.md        # Source licences (OGL-3.0 etc.)
 ├── docker-compose.yml         # Qdrant service
 ├── pyproject.toml
