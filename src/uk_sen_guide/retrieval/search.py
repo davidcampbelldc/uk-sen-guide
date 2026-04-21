@@ -1,11 +1,13 @@
 """Search orchestrator — composes BM25 + dense + rerank behind a single API.
 
 Configs:
+  * 'bm25'            — BM25 only (lexical baseline — isolated for "when does
+                        BM25 beat semantic?" analysis)
   * 'semantic'        — dense only (baseline A)
   * 'hybrid'          — BM25 + dense fused (baseline B)
   * 'hybrid_rerank'   — hybrid + cross-encoder rerank (baseline C)
 
-All three return a common Result shape with score breakdown per retriever,
+All four return a common Result shape with score breakdown per retriever,
 which is what the eval harness and the /search API both consume.
 """
 
@@ -23,7 +25,7 @@ from .reranker import CrossEncoderReranker
 
 log = logging.getLogger(__name__)
 
-SearchConfig = Literal["semantic", "hybrid", "hybrid_rerank"]
+SearchConfig = Literal["bm25", "semantic", "hybrid", "hybrid_rerank"]
 
 
 @dataclass
@@ -75,7 +77,25 @@ class SearchService:
         t0 = time.perf_counter()
         query_id = f"q-{int(t0 * 1000) & 0xFFFFFFFF:08x}"
 
-        if config == "semantic":
+        if config == "bm25":
+            bm25_hits = self.bm25.search(query, top_k=candidate_pool)
+            ranked = [
+                (cid, score, {"bm25": score})
+                for cid, score in bm25_hits
+            ][:top_k]
+            total_candidates = len(bm25_hits)
+            payload_by_id = {}
+            for cid, _ in bm25_hits:
+                m = self.bm25.get_chunk(cid)
+                if m:
+                    payload_by_id[cid] = {
+                        "chunk_id": cid,
+                        "doc_id": m.get("doc_id"),
+                        "text": m.get("text", ""),
+                        "section_ref": m.get("section_ref"),
+                        **(m.get("metadata") or {}),
+                    }
+        elif config == "semantic":
             dense_hits = self.dense.search(query, top_k=candidate_pool, filters=filters)
             ranked = [
                 (cid, score, {"semantic": score})

@@ -29,7 +29,7 @@ app = typer.Typer(add_completion=False, no_args_is_help=False)
 console = Console()
 log = logging.getLogger("uk_sen.eval")
 
-CONFIGS: list[SearchConfig] = ["semantic", "hybrid", "hybrid_rerank"]
+CONFIGS: list[SearchConfig] = ["bm25", "semantic", "hybrid", "hybrid_rerank"]
 
 
 def _build_qrels(query: Query, chunks: list[dict]) -> dict[str, int]:

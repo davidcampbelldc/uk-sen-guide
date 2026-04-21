@@ -47,9 +47,14 @@ dominates symptom-driven queries; rerank buys little on out-of-scope).
 A small classifier — either rules-based on query surface features, or
 a small fine-tuned model — that routes each query to the right config:
 
-- Route statutory-citation queries to hybrid with BM25 weight bumped.
-- Route symptom-driven queries to hybrid_rerank with rerank weight
-  bumped.
+- Route statutory-citation queries to **semantic-heavier** weights —
+  counter-intuitively, BM25 isolation showed dense embeddings beat
+  lexical on section-number queries (REPORT "BM25 vs semantic" table).
+  The prior assumption was the opposite; the eval corrected it.
+- Route symptom-driven and process queries to hybrid fusion — where
+  BM25 adds the most marginal signal.
+- Route rights-refusal queries to semantic-only — hybrid dilutes the
+  signal there (BM25 0.167 / semantic 0.285 / hybrid 0.264).
 - Detect out-of-scope queries and short-circuit to a "no specific
   guidance found" response without calling the reranker.
 
