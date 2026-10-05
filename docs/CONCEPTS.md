@@ -1,3 +1,12 @@
+---
+title: "Key Concepts and Architectural Decisions of an SEN Information Search System, Explained in Plain English"
+date: 2026-04-21
+status: PARTIAL
+question: "What problem does this SEN search system solve, and how do its ingestion, chunking and indexing stages work in plain English?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # Key Concepts and Architectural Decisions — In Plain English
 
 A gentler companion to `docs/architecture.md` and `docs/REPORT.md`. Same content, less jargon, designed to be readable by someone who doesn't build search systems for a living. Every technical term is either explained here or cross-referenced in `docs/GLOSSARY.md`.

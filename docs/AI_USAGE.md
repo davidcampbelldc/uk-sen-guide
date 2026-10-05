@@ -1,3 +1,12 @@
+---
+title: "AI collaboration note: authorship and verification of AI-assisted work"
+date: 2026-04-20
+status: PARTIAL
+question: "Which parts of the project were written by Claude Code versus the author, and how was the AI's output reviewed and verified?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # AI Collaboration Note
 
 LEC's brief: *"be honest: which parts did Claude Code / other AI write,

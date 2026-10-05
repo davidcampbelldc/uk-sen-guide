@@ -1,3 +1,12 @@
+---
+title: "Report: Hybrid Retrieval Platform over UK SEN Guidance with Four-Config Evaluation"
+date: 2026-04-20
+status: PARTIAL
+question: "How do BM25, semantic, hybrid, and reranked hybrid retrieval compare on precision, recall and NDCG over UK SEN guidance documents?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # Report — Retrieval Platform over UK SEN Guidance
 
 *Target ≤2 pages per brief. Narrative fits; the tables of real measurements push to page 3. Keeping them in service of the brief's "real numbers, not vibes" signal is the deliberate trade-off. All numbers are real measurements from runs committed to the repo under `eval_runs/` — reviewer can recompute every aggregate below directly from the JSONL.*

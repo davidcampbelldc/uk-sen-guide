@@ -1,3 +1,12 @@
+---
+title: "Attributions and licensing for UK SEND guidance sources, models and libraries"
+date: 2026-04-20
+status: PARTIAL
+question: "What are the copyright licences, attribution requirements and reuse terms for the source content, models and libraries used in this repository?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # Attributions
 
 This repository ingests publicly-published UK Special Educational Needs

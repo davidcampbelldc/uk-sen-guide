@@ -1,3 +1,12 @@
+---
+title: "Roadmap: next-week feature priorities for retrieval and synthesis layer"
+date: 2026-04-20
+status: PARTIAL
+question: "What features should be shipped next, ordered by impact-per-engineering-day, and why?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # What I'd Ship Next Week
 
 A concrete roadmap if I had one more focused week after this delivery.

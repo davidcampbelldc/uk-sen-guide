@@ -1,3 +1,12 @@
+---
+title: "Architecture Decisions for a Hybrid Retrieval Platform"
+date: 2026-04-20
+status: PARTIAL
+question: "What architectural choices, alternatives and trade-offs underpin the retrieval platform's ingest, indexing, retrieval and API layers?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # Architecture Decisions
 
 This document explains the architectural choices behind the retrieval

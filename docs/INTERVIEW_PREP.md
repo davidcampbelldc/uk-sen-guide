@@ -1,3 +1,12 @@
+---
+title: "Interview Preparation Reference for a SEN/SEND RAG Retrieval Project"
+date: 2026-05-11
+status: PARTIAL
+question: "How does the SEN guidance RAG system work — from document ingestion and hybrid search through to evaluation — and what was learned at each stage?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # Interview Prep — Deep Technical Reference
 
 A comprehensive guide to every concept, decision, and finding in this project. Written to prepare you to discuss each topic fluently at interview depth — from first principles through to the specific choices made here and what was learned.

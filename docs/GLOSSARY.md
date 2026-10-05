@@ -1,3 +1,12 @@
+---
+title: "Glossary of Terms and Model Names Used Across the SEND Guidance Search Project"
+date: 2026-04-21
+status: PARTIAL
+question: "What do the terms, acronyms, and model names used in this repository's documentation mean?"
+topic: docs
+backfilled: 2026-10-05
+---
+
 # Glossary
 
 Plain-English definitions of the terms, acronyms, and model names used across the repo and its documentation. Alphabetical. If a term is used anywhere in the docs without an inline explanation, it should appear here.
